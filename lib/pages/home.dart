@@ -96,7 +96,9 @@ class HomePageState extends State<HomePage>
       actions: <Widget>[
         IconButton(
           icon: Icon(Icons.settings),
-          onPressed: () {},
+          onPressed: () {
+			  Navigator.of(context).pushNamed('/recordVideo');
+		  },
         )
       ],
     );

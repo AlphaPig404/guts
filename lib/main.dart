@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gut/pages/example.dart';
+import 'package:gut/pages/recordVideo.dart';
 import 'package:gut/pages/home.dart';
 import 'package:gut/pages/login.dart';
 import 'package:gut/pages/register.dart';
@@ -44,15 +46,16 @@ class Gut extends StatelessWidget{
           headline: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
           title: TextStyle(fontSize: 21.0, fontWeight: FontWeight.bold),
           body1: TextStyle(fontSize: 15.0),
-          body2: TextStyle(fontSize: 16.0)
+          body2: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)
         ),
       ),
       routes: <String, WidgetBuilder>{
         '/login': (BuildContext context) => new LoginPage(),
         '/register': (BuildContext context) => new RegisterPage(),
-        '/home': (BuildContext context) => new HomePage()
+        '/home': (BuildContext context) => new HomePage(),
+		'/recordVideo': (BuildContext context) => new RecordPage()
       },
-      home: new LoginPage()
+      home: new RecordPage()
     );
   }
 }

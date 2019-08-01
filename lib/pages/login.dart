@@ -55,7 +55,7 @@ class LoginState extends State<LoginPage> {
               alignment: Alignment.center,
               children: <Widget>[
                 Image.asset(
-                  "assets/images/background@2x.png",
+                  "assets/images/background.png",
                   fit: BoxFit.cover,
                   color: Color.fromARGB(210, 43, 43, 48),
                   colorBlendMode: BlendMode.hardLight,
