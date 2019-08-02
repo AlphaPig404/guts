@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gut/pages/example.dart';
+import 'package:gut/pages/movieList.dart';
 import 'package:gut/pages/recordVideo.dart';
 import 'package:gut/pages/home.dart';
 import 'package:gut/pages/login.dart';
 import 'package:gut/pages/register.dart';
+import 'package:gut/pages/videoEdit.dart';
+import 'package:gut/utils/movieDir.dart';
 import 'pages/welcome.dart';
 
 const SystemUiOverlayStyle light = SystemUiOverlayStyle(
@@ -25,12 +28,20 @@ const SystemUiOverlayStyle dark = SystemUiOverlayStyle(
     statusBarBrightness: Brightness.light,
 );
 
-void main(){
+void main() async {
+  await MovieDir().init();
   runApp(Gut());
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
 }
 
 class Gut extends StatelessWidget{
+   final Map<String, WidgetBuilder> routes= <String, WidgetBuilder>{
+        '/login': (BuildContext context) => new LoginPage(),
+        '/register': (BuildContext context) => new RegisterPage(),
+        '/home': (BuildContext context) => new HomePage(),
+		'/recordVideo': (BuildContext context) => new RecordPage(),
+		'/movieList': (BuildContext context) => new MovieListPage(),
+  };
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -49,12 +60,15 @@ class Gut extends StatelessWidget{
           body2: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)
         ),
       ),
-      routes: <String, WidgetBuilder>{
-        '/login': (BuildContext context) => new LoginPage(),
-        '/register': (BuildContext context) => new RegisterPage(),
-        '/home': (BuildContext context) => new HomePage(),
-		'/recordVideo': (BuildContext context) => new RecordPage()
-      },
+	  onGenerateRoute: (RouteSettings settings){
+		  switch (settings.name){
+			 case '/videoEdit':
+			 	final VideoEditPageAguments args = settings.arguments;
+			 	return MaterialPageRoute(builder: (context)=>VideoEditPage(videoPath: args.videoPath));
+			 default: 
+			 	return MaterialPageRoute(builder: routes[settings.name]);
+		  }
+	  },
       home: new RecordPage()
     );
   }

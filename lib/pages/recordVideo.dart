@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:gut/pages/videoEdit.dart';
+import 'package:gut/utils/common.dart';
 
 List<CameraDescription> cameras;
 
@@ -12,21 +15,26 @@ class RecordPage extends StatefulWidget {
 class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
   CameraController controller;
   bool _isReady = false;
+  bool _isCompleteRecord = false;
   int camerasIndex = 1;
   bool isRecording = false;
-  List<String> videoList = [];
+  List<String> videoPathList = [];
   Timer _countdownTimer;
   double _progereeRate = 0.0;
   int _millisecondsCounter = 0;
+  String complexVideoPath;
+  final int limitSeconds = 15;
+  final int _millisecondsStep = 17;
+  final String videoId = DateTime.now().millisecondsSinceEpoch.toString();
 
-  bool get isPause{
-	  return !isRecording && videoList.isNotEmpty;
+  bool get isPause {
+    return !isRecording && videoPathList.isNotEmpty;
   }
 
   @override
   void initState() {
     super.initState();
-    //  WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     _setupCameras();
   }
 
@@ -35,22 +43,80 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     onNewCameraSelected(camerasIndex);
   }
 
-  void _initTimer(){
-	  if (_countdownTimer != null) {
-          return;
+  Future<String> _startVideoRecording() async {
+    if (!controller.value.isInitialized || controller.value.isRecordingVideo) {
+      print('Error: controller issue');
+      return '';
+    }
+    print('${videoPathList.length}');
+    final String filePath =
+        '${Common.movieDir.path}/${videoId}_segment_${videoPathList.length}.mp4';
+    try {
+      await controller.startVideoRecording(filePath);
+      setState(() {
+        videoPathList.add(filePath);
+      });
+    } on CameraException catch (e) {
+      print('CameraException:$e');
+      return '';
+    }
+    return filePath;
+  }
+
+  Future<void> _stopVideoRecording() async {
+    if (!controller.value.isRecordingVideo) {
+      return null;
+    }
+    try {
+      await controller.stopVideoRecording();
+    } on CameraException catch (e) {
+      print('CameraException$e');
+      return null;
+    }
+  }
+
+  void _initTimer() {
+    if (_countdownTimer != null) {
+      return;
+    }
+    _countdownTimer =
+        Timer.periodic(Duration(milliseconds: _millisecondsStep), (timer) {
+      //   print('tick');
+      if (_progereeRate < 1) {
+        _millisecondsCounter += _millisecondsStep;
+        setState(() {
+          _progereeRate = _millisecondsCounter / (limitSeconds * 1000);
+        });
+      } else {
+        setState(() {
+          _isCompleteRecord = true;
+        });
+        pauseVideo();
       }
-	  _countdownTimer = Timer.periodic(Duration(milliseconds: 17), (timer){
-		  print('tick');
-		  if(_progereeRate < 1){
-			  _millisecondsCounter += 17;
-			  setState(() {
-			    _progereeRate= _millisecondsCounter /(60*1000);
-			  });
-		  }else{
-			_countdownTimer.cancel();
-            _countdownTimer = null;
-		  }
-	  });
+    });
+  }
+
+  void _clearTimer() {
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+  }
+
+  void pauseVideo() {
+    _clearTimer();
+    setState(() {
+      isRecording = false;
+    });
+    _stopVideoRecording().then((_) {
+      print('complete recording');
+      if (_isCompleteRecord) {
+        jump2EditPage();
+      }
+    });
+  }
+
+  void jump2EditPage() {
+    Navigator.of(context).pushNamed('/videoEdit',
+        arguments: VideoEditPageAguments(complexVideoPath));
   }
 
   void onNewCameraSelected(int index) async {
@@ -84,8 +150,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
   @override
   void dispose() {
     controller?.dispose();
-	_countdownTimer?.cancel();
-    _countdownTimer = null;
+    pauseVideo();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -95,16 +160,16 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     print('haha');
     if (state == AppLifecycleState.inactive) {
       controller?.dispose();
+      print('inactive');
     } else if (state == AppLifecycleState.resumed) {
       if (controller != null) {
-        print('lala');
+        onNewCameraSelected(camerasIndex);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('build');
     if (!_isReady || !controller.value.isInitialized) {
       return Container();
     }
@@ -117,6 +182,11 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
               Positioned(
                 top: 35,
                 child: buildHeader(),
+              ),
+              Positioned(
+                right: 10,
+                top: 200,
+                child: buildFileList(),
               ),
               Positioned(
                 bottom: 14,
@@ -155,6 +225,15 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
           )
         ],
       ),
+    );
+  }
+
+  Widget buildFileList() {
+    return IconButton(
+      icon: Icon(Icons.filter),
+      onPressed: () {
+        Navigator.of(context).pushNamed('/movieList');
+      },
     );
   }
 
@@ -228,6 +307,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     return GestureDetector(
         onTap: () {
           print('tapSave');
+          jump2EditPage();
         },
         child: Container(
             width: 36,
@@ -239,11 +319,22 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
   Widget buildRecordButton() {
     return GestureDetector(
         onTap: () {
-          print('tapRecordButton');
-          setState(() {
-            isRecording = !isRecording;
-          });
-		  _initTimer();
+          if (isRecording) {
+            pauseVideo();
+          } else {
+            print('startRecord');
+            _initTimer();
+            _startVideoRecording().then((String filePath) {
+              if (filePath != null) print('Saving video to $filePath');
+              if (complexVideoPath == null) {
+                complexVideoPath = filePath;
+                print('set complexVideoPath');
+              }
+            });
+            setState(() {
+              isRecording = true;
+            });
+          }
         },
         child: Container(
             width: 80,
@@ -259,6 +350,9 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     return GestureDetector(
         onTap: () {
           print('tapClear');
+		  // dialog
+		  // video list pop
+		  // processbarpop
         },
         child: Container(
             width: 36,
