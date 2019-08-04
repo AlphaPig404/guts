@@ -28,19 +28,19 @@ class MovieListPage extends StatelessWidget {
       return ListView.separated(
         itemCount: fileList.length,
         itemBuilder: (BuildContext context, int index) {
-		  File file = fileList[index];
+          File file = fileList[index];
           return ListTile(
             title: Text(file.path),
-			subtitle: Text(file.path),
+            subtitle: Text(file.path),
             trailing: IconButton(
               icon: Icon(Icons.delete),
               onPressed: () {
-				  file.deleteSync();
-			  },
+                file.deleteSync();
+              },
             ),
-			onTap: (){
-				Navigator.of(context).pushNamed('/videoEdit', arguments: VideoEditPageAguments(file.path));
-			},
+            onTap: () {
+              // Navigator.of(context).pushNamed('/videoEdit', arguments: VideoEditPageAguments(file.path));
+            },
           );
         },
         separatorBuilder: (BuildContext context, int index) {

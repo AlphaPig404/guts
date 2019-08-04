@@ -14,9 +14,14 @@ class MovieDir {
 
 	Future<int> init() async {
 		final Directory extDir = await getApplicationDocumentsDirectory();
-		final String dirPath = '${extDir.path}/${Common.movieAbsolutePath}';
-		final Directory movieDir = await Directory(dirPath).create(recursive: true);
+		final String movieDirPath = '${extDir.path}/${Common.movieAbsolutePath}';
+		final Directory movieDir = await Directory(movieDirPath).create(recursive: true);
 		Common.movieDir = movieDir;
+
+    final String cacheDirPath = '${extDir.path}/${Common.cacheAbsolutePath}';
+    final Directory cacheDir = await Directory(cacheDirPath).create(recursive: true);
+    Common.cache = cacheDir;
+    
 		return 0;
 	}
 

@@ -9,6 +9,7 @@ import 'package:gut/pages/register.dart';
 import 'package:gut/pages/videoEdit.dart';
 import 'package:gut/utils/movieDir.dart';
 import 'pages/welcome.dart';
+import 'package:gut/model/localVideo.dart';
 
 const SystemUiOverlayStyle light = SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF000000),
@@ -63,13 +64,13 @@ class Gut extends StatelessWidget{
 	  onGenerateRoute: (RouteSettings settings){
 		  switch (settings.name){
 			 case '/videoEdit':
-			 	final VideoEditPageAguments args = settings.arguments;
-			 	return MaterialPageRoute(builder: (context)=>VideoEditPage(videoPath: args.videoPath));
+			 	final LocalVideo args = settings.arguments;
+			 	return MaterialPageRoute(builder: (context)=>VideoEditPage(localVideo: args));
 			 default: 
 			 	return MaterialPageRoute(builder: routes[settings.name]);
 		  }
 	  },
-      home: new RecordPage()
+      home: new HomePage()
     );
   }
 }
