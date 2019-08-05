@@ -125,6 +125,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
   }
 
   void pauseVideo() {
+	if(!isRecording){return ;}
     _clearTimer();
     setState(() {
       isRecording = false;
@@ -174,8 +175,8 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    controller?.dispose();
     pauseVideo();
+	controller?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -336,21 +337,15 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: 100,
-      child: Stack(
-        alignment: AlignmentDirectional.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           isPause
-              ? Positioned(
-                  left: 77.5,
-                  child: buildSaveButton(),
-                )
+              ? buildSaveButton()
               : Container(height: 0.0, width: 0.0),
           buildRecordButton(),
           isPause
-              ? Positioned(
-                  right: 77.5,
-                  child: buildClearButton(),
-                )
+              ? buildClearButton()
               : Container(height: 0.0, width: 0.0),
         ],
       ),
@@ -368,8 +363,9 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
           }
         },
         child: Container(
-            width: 16,
-            height: 16,
+            width: 36,
+            height: 36,
+			padding: EdgeInsets.all(10),
             child: Image.asset('assets/images/icRecordingExit.png',
                 fit: BoxFit.fill)));
   }
@@ -394,8 +390,9 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
           jump2EditPage();
         },
         child: Container(
-            width: 36,
-            height: 36,
+            width: 80,
+            height: 80,
+			padding: EdgeInsets.all(22),
             child: Image.asset('assets/images/icRecording.png',
                 fit: BoxFit.fill)));
   }
@@ -419,6 +416,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
         child: Container(
             width: 80,
             height: 80,
+			margin: EdgeInsets.fromLTRB(14, 0, 14, 0),
             child: Image.asset(
                 isRecording
                     ? 'assets/images/icRecordingPause.png'
@@ -433,8 +431,9 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
          showMyMaterialDialog(context);
         },
         child: Container(
-            width: 36,
-            height: 36,
+            width: 80,
+            height: 80,
+			padding: EdgeInsets.all(22),
             child: Image.asset('assets/images/icRecordingDel.png',
                 fit: BoxFit.fill)));
   }

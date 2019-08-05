@@ -176,7 +176,9 @@ class HomePageState extends State<HomePage>
                     'Watch',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+					  Navigator.of(context).pushNamed('/watchRoom');
+				  },
                   color: Color.fromARGB(25, 255, 255, 255),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(60))),

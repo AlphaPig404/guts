@@ -7,6 +7,7 @@ import 'package:gut/pages/home.dart';
 import 'package:gut/pages/login.dart';
 import 'package:gut/pages/register.dart';
 import 'package:gut/pages/videoEdit.dart';
+import 'package:gut/pages/watchRoom.dart';
 import 'package:gut/utils/movieDir.dart';
 import 'pages/welcome.dart';
 import 'package:gut/model/localVideo.dart';
@@ -42,6 +43,7 @@ class Gut extends StatelessWidget{
         '/home': (BuildContext context) => new HomePage(),
 		'/recordVideo': (BuildContext context) => new RecordPage(),
 		'/movieList': (BuildContext context) => new MovieListPage(),
+		'/watchRoom': (BuildContext context) => new WatchRoomPage()
   };
   @override
   Widget build(BuildContext context) {
