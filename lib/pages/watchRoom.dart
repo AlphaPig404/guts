@@ -75,36 +75,92 @@ class WatchRoomState extends State<WatchRoomPage> {
     final VideoPlayerController _controller = _controllerList[index];
     final Future<void> _initializeVideoPlayer =
         _initializeVideoPlayerFutureList[index];
-    return GestureDetector(
-      child: Container(
-        child: FutureBuilder(
-          future: _initializeVideoPlayer,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (_currentIndex == index) {
-                _controllerList[index].seekTo(Duration(seconds: 0));
-                _controllerList[index].play();
-              } else {
-                _controllerList[index].pause();
-              }
-              return AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                // Use the VideoPlayer widget to display the video.
-                child: VideoPlayer(_controller),
-              );
-            } else {
-              // If the VideoPlayerController is still initializing, show a
-              // loading spinner.
-              return Center(child: CircularProgressIndicator());
-            }
+    return Stack(
+      children: <Widget>[
+        GestureDetector(
+          child: Container(
+			height: MediaQuery.of(context).size.height,
+            child: FutureBuilder(
+              future: _initializeVideoPlayer,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (_currentIndex == index) {
+                    _controllerList[index].seekTo(Duration(seconds: 0));
+                    _controllerList[index].play();
+                  } else {
+                    _controllerList[index].pause();
+                  }
+                  return AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    // Use the VideoPlayer widget to display the video.
+                    child: VideoPlayer(_controller),
+                  );
+                } else {
+                  // If the VideoPlayerController is still initializing, show a
+                  // loading spinner.
+                  return Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+          ),
+          onTap: () {
+            _controller.value.isPlaying
+                ? _controllerList[_currentIndex].pause()
+                : _controllerList[_currentIndex].play();
           },
         ),
-      ),
-      onTap: () {
-        _controller.value.isPlaying
-            ? _controllerList[_currentIndex].pause()
-            : _controllerList[_currentIndex].play();
-      },
+		Positioned(
+			bottom: 0,
+			child: Container(
+				width: MediaQuery.of(context).size.width,
+				height: 100,
+				decoration: BoxDecoration(  
+					gradient: LinearGradient(  
+						colors: [
+							Color.fromARGB(0, 0, 0, 0),
+							Color.fromARGB(76, 0, 0, 0),
+						],
+						begin: FractionalOffset(1, 0)
+					)
+				),
+				child: Row(
+					mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+					children: <Widget>[
+						_buildFavoriteButton(),
+						_buildCommentButton(),
+						_buildSharedButton(),
+					],
+				),
+			)
+		)
+      ],
     );
+  }
+
+  Widget _buildFavoriteButton(){
+	  return Column(
+		  children: <Widget>[
+			  IconButton(icon: Icon(Icons.favorite_border),onPressed: (){},),
+			  Text('40.5k')
+		  ],
+	  );
+  }
+
+  Widget _buildSharedButton(){
+	  return Column(
+		  children: <Widget>[
+			  IconButton(icon: Icon(Icons.share),onPressed: (){},),
+			  Text('')
+		  ],
+	  );
+  }
+
+  Widget _buildCommentButton(){
+	  return Column(
+		  children: <Widget>[
+			  IconButton(icon: Icon(Icons.comment),onPressed: (){},),
+			  Text('40k')
+		  ],
+	  );
   }
 }

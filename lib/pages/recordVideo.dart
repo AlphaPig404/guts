@@ -6,7 +6,7 @@ import 'package:gut/pages/videoEdit.dart';
 import 'package:gut/utils/common.dart';
 import 'package:gut/model/localVideo.dart';
 
-List<CameraDescription> cameras;
+List<CameraDescription> cameras = [];
 
 class RecordPage extends StatefulWidget {
   @override
@@ -46,6 +46,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+	print('initState');
     _setupCameras();
     _initLocalVideo();
   }
@@ -60,9 +61,24 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     );
   }
 
-  Future<void> _setupCameras() async {
-    cameras = await availableCameras();
-    onNewCameraSelected(camerasIndex);
+  void _setupCameras(){
+	  print('_setupCamners');
+	  print(cameras.length);
+	  if(cameras.length > 0){
+		onNewCameraSelected(camerasIndex);
+	  }else{
+		  Future.delayed(const Duration(milliseconds: 300), (){
+			availableCameras().then((_cameras){
+				print('ok');
+				cameras = _cameras;
+				if(cameras.length > 0){
+					onNewCameraSelected(camerasIndex);
+				}else{
+					print('Error: avialibelCameras');
+				}
+			});
+		});
+	  }
   }
 
   Future<String> _startVideoRecording() async {
@@ -147,6 +163,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
 
   void onNewCameraSelected(int index) async {
     if (controller != null) {
+	  print('dispose');
       await controller.dispose();
     }
     controller = CameraController(
@@ -162,6 +179,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     });
 
     try {
+	  await controller.prepareForVideoRecording();
       await controller.initialize();
     } on CameraException catch (_) {}
 
@@ -197,8 +215,9 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+	print('build all');
     if (!_isReady || !controller.value.isInitialized) {
-      return Container();
+      return Center();
     }
     return AspectRatio(
         aspectRatio: controller.value.aspectRatio,
@@ -403,14 +422,16 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
           if (isRecording) {
             pauseVideo();
           } else {
-            print('startRecord');
-            _initTimer();
             _startVideoRecording().then((String filePath) {
-              if (filePath != null) print('Saving video to $filePath');
+              if (filePath != null) {
+				_initTimer();
+				print('Saving video to $filePath');
+				setState(() {
+					isRecording = true;
+				});
+			  }
             });
-            setState(() {
-              isRecording = true;
-            });
+            
           }
         },
         child: Container(
