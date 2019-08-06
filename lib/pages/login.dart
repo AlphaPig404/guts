@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert' as JSON;
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -34,14 +35,18 @@ class LoginState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget contentSection = Column(
-      children: <Widget>[
-        Text('WELCOME TO GUT',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.title),
-        LoginForm(),
-        _buildRigisterRow()
-      ],
+    Widget contentSection = Container(
+      alignment: AlignmentDirectional.center,
+      height: 400,
+      child: Column(
+        children: <Widget>[
+          Text('WELCOME TO GUT',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.title),
+          LoginForm(),
+          _buildRigisterRow()
+        ],
+      ),
     );
 
     return Scaffold(
@@ -52,7 +57,7 @@ class LoginState extends State<LoginPage> {
           },
           child: Container(
             child: Stack(
-              alignment: Alignment.center,
+              alignment: AlignmentDirectional.center,
               children: <Widget>[
                 Image.asset(
                   "assets/images/background.png",
@@ -61,10 +66,7 @@ class LoginState extends State<LoginPage> {
                   colorBlendMode: BlendMode.hardLight,
                   height: MediaQuery.of(context).size.height,
                 ),
-                Positioned(
-                  top: 158.5,
-                  child: contentSection,
-                )
+                contentSection
               ],
             ),
           )),
@@ -130,7 +132,10 @@ class LoginFormState extends State<LoginForm> {
             borderRadius: BorderRadius.all(Radius.circular(5))),
         child: RaisedButton(
             child: Text('Confirm',
-                style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold)),
             onPressed: _submitValues));
   }
 
@@ -187,7 +192,10 @@ class LoginFormState extends State<LoginForm> {
             Expanded(
               child: TextFormField(
                 keyboardType: TextInputType.phone,
-				cursorColor: Colors.white,
+                cursorColor: Colors.white,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(13),
+                ],
                 decoration: InputDecoration(
                     labelText: 'Phone No.',
                     border: InputBorder.none,
@@ -219,7 +227,10 @@ class LoginFormState extends State<LoginForm> {
               borderRadius: BorderRadius.all(Radius.circular(5))),
           child: TextFormField(
             keyboardType: TextInputType.number,
-			cursorColor: Colors.white,
+            cursorColor: Colors.white,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(6),
+            ],
             decoration: InputDecoration(
                 labelText: 'Captcha',
                 hasFloatingPlaceholder: false,
