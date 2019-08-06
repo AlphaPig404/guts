@@ -38,15 +38,19 @@ class HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(),
-      body: TabBarView(
-        controller: _tabController,
-        children: tabList.map((tabName){
-			return _buildSuggestions(tabName);
-		}).toList(),
-      ),
-    );
+    return WillPopScope(
+        onWillPop: () async {
+          return false;
+        },
+        child: Scaffold(
+          appBar: _buildAppBar(),
+          body: TabBarView(
+            controller: _tabController,
+            children: tabList.map((tabName) {
+              return _buildSuggestions(tabName);
+            }).toList(),
+          ),
+        ));
   }
 
   Widget _buildAppBar() {
@@ -99,8 +103,8 @@ class HomePageState extends State<HomePage>
         IconButton(
           icon: Icon(Icons.settings),
           onPressed: () {
-			  Navigator.of(context).pushNamed('/recordVideo');
-		  },
+            Navigator.of(context).pushNamed('/recordVideo');
+          },
         )
       ],
     );
@@ -152,7 +156,7 @@ class HomePageState extends State<HomePage>
   }
 
   Widget buildDetailSection(String tabName) {
-	final bool isWatcher = tabName == 'Watcher';
+    final bool isWatcher = tabName == 'Watcher';
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -176,12 +180,14 @@ class HomePageState extends State<HomePage>
                 height: 28,
                 child: FlatButton(
                   child: Text(
-                    isWatcher?'Watch':'Accept',
-                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: 13),
+                    isWatcher ? 'Watch' : 'Accept',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                   onPressed: () {
-					  isWatcher ? Navigator.of(context).pushNamed('/watchRoom') : Navigator.of(context).pushNamed('/recordVideo');
-				  },
+                    isWatcher
+                        ? Navigator.of(context).pushNamed('/watchRoom')
+                        : Navigator.of(context).pushNamed('/recordVideo');
+                  },
                   color: Color.fromARGB(25, 255, 255, 255),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(60))),

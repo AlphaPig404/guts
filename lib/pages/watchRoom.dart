@@ -13,13 +13,13 @@ class WatchRoomState extends State<WatchRoomPage> {
 //   VideoPlayerController _currentController;
 //   Future<void> _initializeVideoPlayerFuture;
   List<String> videoList = [
-	  'assets/videos/1564985072455986.mp4',
-	  'assets/videos/1564985192679807.mp4',
-	  'assets/videos/1564985217646970.mp4',
-	  'assets/videos/1564985233887636.mp4'
+    'assets/videos/1564985072455986.mp4',
+    'assets/videos/1564985192679807.mp4',
+    'assets/videos/1564985217646970.mp4',
+    'assets/videos/1564985233887636.mp4'
   ];
-  List<VideoPlayerController> _controllerList=[];
-  List<Future<void>> _initializeVideoPlayerFutureList=[];
+  List<VideoPlayerController> _controllerList = [];
+  List<Future<void>> _initializeVideoPlayerFutureList = [];
   int _currentIndex = 0;
 
   @override
@@ -28,20 +28,21 @@ class WatchRoomState extends State<WatchRoomPage> {
     super.initState();
   }
 
-  void initController(newVideos){
-	videoList.asMap().forEach((index, path){
-		final VideoPlayerController controller = VideoPlayerController.asset(path);
-		final Future<void> initializeVideoPlayerFuture = controller.initialize();
-		controller.setLooping(true);
-		_controllerList.add(controller);
-		_initializeVideoPlayerFutureList.add(initializeVideoPlayerFuture);
-	});
+  void initController(newVideos) {
+    videoList.asMap().forEach((index, path) {
+      final VideoPlayerController controller =
+          VideoPlayerController.asset(path);
+      final Future<void> initializeVideoPlayerFuture = controller.initialize();
+      controller.setLooping(true);
+      _controllerList.add(controller);
+      _initializeVideoPlayerFutureList.add(initializeVideoPlayerFuture);
+    });
   }
 
   @override
   void dispose() {
     // Ensure disposing of the VideoPlayerController to free up resources.
-    _controllerList.forEach((controller)=>controller?.dispose());
+    _controllerList.forEach((controller) => controller?.dispose());
     super.dispose();
   }
 
@@ -56,13 +57,13 @@ class WatchRoomState extends State<WatchRoomPage> {
         itemCount: videoList.length,
         scrollDirection: Axis.vertical,
         onIndexChanged: (index) {
-		  if(index == videoList.length - 1){
-			initController(videoList.sublist(0,4));
-			videoList.addAll(videoList.sublist(0,4));
-		  }
+          if (index == videoList.length - 1) {
+            initController(videoList.sublist(0, 4));
+            videoList.addAll(videoList.sublist(0, 4));
+          }
           setState(() {
             _currentIndex = index;
-			print(index);
+            print(index);
           });
         },
         loop: false,
@@ -71,20 +72,21 @@ class WatchRoomState extends State<WatchRoomPage> {
   }
 
   Widget buildVideoList(BuildContext context, int index) {
-	final VideoPlayerController _controller = _controllerList[index];
-	final Future<void> _initializeVideoPlayer = _initializeVideoPlayerFutureList[index];
+    final VideoPlayerController _controller = _controllerList[index];
+    final Future<void> _initializeVideoPlayer =
+        _initializeVideoPlayerFutureList[index];
     return GestureDetector(
       child: Container(
         child: FutureBuilder(
           future: _initializeVideoPlayer,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
-              if(_currentIndex == index){
-				  _controllerList[index].seekTo(Duration(seconds: 0));
-				  _controllerList[index].play();
-			  }else{
-					_controllerList[index].pause();
-			  }
+              if (_currentIndex == index) {
+                _controllerList[index].seekTo(Duration(seconds: 0));
+                _controllerList[index].play();
+              } else {
+                _controllerList[index].pause();
+              }
               return AspectRatio(
                 aspectRatio: _controller.value.aspectRatio,
                 // Use the VideoPlayer widget to display the video.
@@ -99,8 +101,10 @@ class WatchRoomState extends State<WatchRoomPage> {
         ),
       ),
       onTap: () {
-		  _controllerList[_currentIndex].pause();
-	  },
+        _controller.value.isPlaying
+            ? _controllerList[_currentIndex].pause()
+            : _controllerList[_currentIndex].play();
+      },
     );
   }
 }
