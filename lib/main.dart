@@ -72,7 +72,7 @@ class Gut extends StatelessWidget{
 			 	return MaterialPageRoute(builder: routes[settings.name]);
 		  }
 	  },
-      home: new HomePage()
+      home: new LoginPage()
     );
   }
 }

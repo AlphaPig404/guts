@@ -42,7 +42,9 @@ class HomePageState extends State<HomePage>
       appBar: _buildAppBar(),
       body: TabBarView(
         controller: _tabController,
-        children: <Widget>[_buildSuggestions(), _buildSuggestions()],
+        children: tabList.map((tabName){
+			return _buildSuggestions(tabName);
+		}).toList(),
       ),
     );
   }
@@ -104,7 +106,7 @@ class HomePageState extends State<HomePage>
     );
   }
 
-  Widget _buildSuggestions() {
+  Widget _buildSuggestions(String tabName) {
     return new ListView.builder(
       padding: const EdgeInsets.all(10.0),
       itemBuilder: (context, i) {
@@ -115,7 +117,7 @@ class HomePageState extends State<HomePage>
           // ...接着再生成10个单词对，然后添加到建议列表
           videoList.addAll(['aaa']);
         }
-        return _buildRow(videoList[index]);
+        return _buildRow(tabName, videoList[index]);
       },
     );
   }
@@ -149,7 +151,8 @@ class HomePageState extends State<HomePage>
     );
   }
 
-  Widget buildDetailSection() {
+  Widget buildDetailSection(String tabName) {
+	final bool isWatcher = tabName == 'Watcher';
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -173,16 +176,16 @@ class HomePageState extends State<HomePage>
                 height: 28,
                 child: FlatButton(
                   child: Text(
-                    'Watch',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    isWatcher?'Watch':'Accept',
+                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: 13),
                   ),
                   onPressed: () {
-					  Navigator.of(context).pushNamed('/watchRoom');
+					  isWatcher ? Navigator.of(context).pushNamed('/watchRoom') : Navigator.of(context).pushNamed('/recordVideo');
 				  },
                   color: Color.fromARGB(25, 255, 255, 255),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(60))),
-                  textColor: Colors.blue,
+                  textColor: isWatcher ? Colors.blue : Colors.yellow,
                 ),
               )
             ],
@@ -220,14 +223,14 @@ class HomePageState extends State<HomePage>
     );
   }
 
-  Widget _buildRow(video) {
+  Widget _buildRow(String tabName, video) {
     return Container(
       padding: EdgeInsets.all(15),
       child: Column(
         children: <Widget>[
           buildTitleSection(),
           SizedBox(height: 20),
-          buildDetailSection(),
+          buildDetailSection(tabName),
         ],
       ),
     );
