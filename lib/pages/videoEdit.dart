@@ -19,7 +19,7 @@ class VideoEditPageAguments {
 
 class VideoEditPageState extends State<VideoEditPage> {
   VideoPlayerController _currentController;
-  List<VideoPlayerController> _controllerList=[];
+  List<VideoPlayerController> _controllerList = [];
   int currentIndex = 0;
   List<Segment> segments;
 
@@ -27,53 +27,59 @@ class VideoEditPageState extends State<VideoEditPage> {
   void initState() {
     super.initState();
     segments = widget.localVideo.segments;
-    // _initController();
-    testPorformance();
+    _initController();
   }
 
-  void testPorformance(){
-    segments.asMap().forEach((i, segment){
+  void _initController() {
+    segments.asMap().forEach((i, segment) {
       final File file = File(segments[i].path);
       VideoPlayerController controller = VideoPlayerController.file(file);
       controller.setLooping(false);
-      if(currentIndex != i){
+      if (currentIndex != i) {
         controller.initialize();
       }
+	  controller.addListener(videoListener);
       _controllerList.add(controller);
-      controller.addListener(videoListener);
     });
-    setState(() {
-      _currentController =_controllerList[currentIndex];
-    });
-    _currentController.initialize().then((ov){
-      _currentController.play();
+    _currentController = _controllerList[currentIndex];
+    _currentController.initialize().then((ov) {
+		print('$currentIndex');
+		setState(() {
+			_currentController.play();
+		});
     });
   }
 
-  void videoListener(){
+  void videoListener() {
     if (_currentController == null ||
-      _currentController.value == null ||
-      _currentController.value.position == null ||
-      _currentController.value.duration == null) {
-        return ;
+        _currentController.value == null ||
+        _currentController.value.position == null ||
+        _currentController.value.duration == null) {
+      return;
+    }
+    if (_currentController.value.position.inSeconds ==
+        _currentController.value.duration.inSeconds) {
+      print('over');
+      setState(() {
+        currentIndex = (currentIndex + 1) % segments.length;
+        _currentController = _controllerList[currentIndex];
+      });
+      if (_currentController.value.position.inSeconds ==
+          _currentController.value.duration.inSeconds) {
+        _currentController.seekTo(Duration(seconds: 0));
+      } else {
+        _currentController.play();
       }
-    if (_currentController.value.position.inSeconds == _currentController.value.duration.inSeconds) {
-        print('over');
-        setState(() {
-          currentIndex = (currentIndex + 1) % segments.length;
-          _currentController = _controllerList[currentIndex];
-        });
-        if(_currentController.value.position.inSeconds == _currentController.value.duration.inSeconds){
-          _currentController.seekTo(Duration(seconds: 0));
-        }else{
-          _currentController.play();
-        }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('build');
+    print('build ${_currentController.value.initialized}');
+	
+    final size = MediaQuery.of(context).size;
+    final deviceRatio = size.width / size.height;
+	
     return Scaffold(
       appBar: AppBar(
         title: Text('Post'),
@@ -83,7 +89,7 @@ class VideoEditPageState extends State<VideoEditPage> {
             onPressed: () {
               setState(() {
                 _currentController.pause();
-                widget.localVideo.concatSegments().then((onValue){
+                widget.localVideo.concatSegments().then((onValue) {
                   print('upload');
                 });
               });
@@ -91,13 +97,18 @@ class VideoEditPageState extends State<VideoEditPage> {
           )
         ],
       ),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        child: AspectRatio(
-          aspectRatio: _currentController.value.aspectRatio,
-          child: VideoPlayer(_currentController),
-        ),
-      ),
+      body: _currentController.value.initialized
+          ? Container(
+              child: Transform.scale(
+                scale: _currentController.value.aspectRatio / deviceRatio,
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: _currentController.value.aspectRatio,
+                    child: VideoPlayer(_currentController),
+                  ),
+                ),
+              ))
+          : Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -105,6 +116,6 @@ class VideoEditPageState extends State<VideoEditPage> {
   void dispose() {
     super.dispose();
     print('dispose');
-    _controllerList.forEach((controller)=> controller?.dispose());
+    _controllerList.forEach((controller) => controller?.dispose());
   }
 }

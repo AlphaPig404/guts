@@ -33,11 +33,11 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     return !isRecording && localVideo.segments.isNotEmpty;
   }
 
-  int get _counter{
+  int get _counter {
     return _millisecondsCounter;
   }
 
-  set _counter(int count){
+  set _counter(int count) {
     _millisecondsCounter = count;
     _progereeRate = _millisecondsCounter / (limitSeconds * 1000);
   }
@@ -46,39 +46,38 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-	print('initState');
+    print('initState');
     _setupCameras();
     _initLocalVideo();
   }
 
-  void _initLocalVideo(){
+  void _initLocalVideo() {
     localVideo = LocalVideo(
-      name: videoName, 
-      path: '${Common.movieDir.path}/$videoName.mp4',
-      segments: [], 
-      duration: 0.0,
-      targetDuration: limitSeconds
-    );
+        name: videoName,
+        path: '${Common.movieDir.path}/$videoName.mp4',
+        segments: [],
+        duration: 0.0,
+        targetDuration: limitSeconds);
   }
 
-  void _setupCameras(){
-	  print('_setupCamners');
-	  print(cameras.length);
-	  if(cameras.length > 0){
-		onNewCameraSelected(camerasIndex);
-	  }else{
-		  Future.delayed(const Duration(milliseconds: 300), (){
-			availableCameras().then((_cameras){
-				print('ok');
-				cameras = _cameras;
-				if(cameras.length > 0){
-					onNewCameraSelected(camerasIndex);
-				}else{
-					print('Error: avialibelCameras');
-				}
-			});
-		});
-	  }
+  void _setupCameras() {
+    print('_setupCamners');
+    print(cameras.length);
+    if (cameras.length > 0) {
+      onNewCameraSelected(camerasIndex);
+    } else {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        availableCameras().then((_cameras) {
+          print('ok');
+          cameras = _cameras;
+          if (cameras.length > 0) {
+            onNewCameraSelected(camerasIndex);
+          } else {
+            print('Error: avialibelCameras');
+          }
+        });
+      });
+    }
   }
 
   Future<String> _startVideoRecording() async {
@@ -105,10 +104,9 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     try {
       await controller.stopVideoRecording();
       _segmentVideo = Segment(
-        name: '${videoName}_segment_${localVideo.segments.length}',
-        path: _segmentVideoPath,
-        duration: _counter/1000 - localVideo.duration
-      );
+          name: '${videoName}_segment_${localVideo.segments.length}',
+          path: _segmentVideoPath,
+          duration: _counter / 1000 - localVideo.duration);
       setState(() {
         localVideo.pushSement(_segmentVideo);
       });
@@ -127,7 +125,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
       //   print('tick');
       if (_progereeRate < 1) {
         setState(() {
-           _counter += _millisecondsStep;
+          _counter += _millisecondsStep;
         });
       } else {
         pauseVideo();
@@ -141,7 +139,9 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
   }
 
   void pauseVideo() {
-	if(!isRecording){return ;}
+    if (!isRecording) {
+      return;
+    }
     _clearTimer();
     setState(() {
       isRecording = false;
@@ -150,20 +150,19 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
       if (localVideo.isCompleted()) {
         print('complete recording');
         jump2EditPage();
-      }else{
+      } else {
         print('pause recording');
       }
     });
   }
 
   void jump2EditPage() {
-    Navigator.of(context).pushNamed('/videoEdit',
-        arguments: localVideo);
+    Navigator.of(context).pushNamed('/videoEdit', arguments: localVideo);
   }
 
   void onNewCameraSelected(int index) async {
     if (controller != null) {
-	  print('dispose');
+      print('dispose');
       await controller.dispose();
     }
     controller = CameraController(
@@ -179,7 +178,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     });
 
     try {
-	  await controller.prepareForVideoRecording();
+      await controller.prepareForVideoRecording();
       await controller.initialize();
     } on CameraException catch (_) {}
 
@@ -194,7 +193,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
   @override
   void dispose() {
     pauseVideo();
-	controller?.dispose();
+    controller?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -215,32 +214,40 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-	print('build all');
+    print('build all');
     if (!_isReady || !controller.value.isInitialized) {
       return Center();
     }
-    return AspectRatio(
-        aspectRatio: controller.value.aspectRatio,
-        child: Material(
-          child: Stack(
-            children: <Widget>[
-              CameraPreview(controller),
-              Positioned(
-                top: 35,
-                child: buildHeader(),
+    final size = MediaQuery.of(context).size;
+    final deviceRatio = size.width / size.height;
+    return Material(
+      child: Stack(
+        children: <Widget>[
+          Transform.scale(
+            scale: controller.value.aspectRatio / deviceRatio,
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: controller.value.aspectRatio,
+                child: CameraPreview(controller),
               ),
-              Positioned(
-                right: 10,
-                top: 200,
-                child: buildFileList(),
-              ),
-              Positioned(
-                bottom: 14,
-                child: buildFooter(),
-              )
-            ],
+            ),
           ),
-        ));
+          Positioned(
+            top: 35,
+            child: buildHeader(),
+          ),
+          Positioned(
+            right: 10,
+            top: 200,
+            child: buildFileList(),
+          ),
+          Positioned(
+            bottom: 14,
+            child: buildFooter(),
+          )
+        ],
+      ),
+    );
   }
 
   Widget buildHeader() {
@@ -288,68 +295,64 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
       height: 6,
       color: Colors.white,
     );
-    List<Widget> buildAnchors(){
+    List<Widget> buildAnchors() {
       List<Widget> list = [];
       double parentWidth = MediaQuery.of(context).size.width - 20;
-      localVideo.segments.asMap().forEach((index, segment){
-        double _length = localVideo.segments.sublist(0,index+1).fold(0, (t,e)=> t+ e.duration);
-        double _left = parentWidth*(_length/localVideo.targetDuration);
-        list.add(
-          Positioned(
-            left: _left,
-            child: anchor,
-          )
-        );
+      localVideo.segments.asMap().forEach((index, segment) {
+        double _length = localVideo.segments
+            .sublist(0, index + 1)
+            .fold(0, (t, e) => t + e.duration);
+        double _left = parentWidth * (_length / localVideo.targetDuration);
+        list.add(Positioned(
+          left: _left,
+          child: anchor,
+        ));
       });
       return list;
     }
+
     return new Container(
-      height: 38,
-      child: Stack(
-        children: <Widget>[
-          Container(
-            child: Stack(
-              children: <Widget>[
-                PhysicalModel(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(80.0),
-                  clipBehavior: Clip.antiAlias,
-                  child: LinearProgressIndicator(
-                    backgroundColor: Color.fromRGBO(209, 224, 224, 0.2),
-                    value: _progereeRate,
-                    valueColor: AlwaysStoppedAnimation(Colors.yellow[200]),
+        height: 38,
+        child: Stack(
+          children: <Widget>[
+            Container(
+              child: Stack(
+                children: <Widget>[
+                  PhysicalModel(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(80.0),
+                    clipBehavior: Clip.antiAlias,
+                    child: LinearProgressIndicator(
+                      backgroundColor: Color.fromRGBO(209, 224, 224, 0.2),
+                      value: _progereeRate,
+                      valueColor: AlwaysStoppedAnimation(Colors.yellow[200]),
+                    ),
                   ),
-                ),
-                Stack(
-                  children: buildAnchors(),
-                )
-              ],
+                  Stack(
+                    children: buildAnchors(),
+                  )
+                ],
+              ),
+              height: 8,
             ),
-            height: 8,
-          ),
-          Positioned(
-            left: 0,
-            top: 10,
-            child: Text(
-              (_counter/1000).toStringAsFixed(1),
-              style: TextStyle(
-                fontSize: 10
+            Positioned(
+              left: 0,
+              top: 10,
+              child: Text(
+                (_counter / 1000).toStringAsFixed(1),
+                style: TextStyle(fontSize: 10),
               ),
             ),
-          ),
-          Positioned(
-            right: 0,
-            top: 10,
-            child: Text(
-              localVideo.targetDuration.toString(),
-              style: TextStyle(
-                fontSize: 10
+            Positioned(
+              right: 0,
+              top: 10,
+              child: Text(
+                localVideo.targetDuration.toString(),
+                style: TextStyle(fontSize: 10),
               ),
             ),
-          ),
-        ],
-      )
-    );
+          ],
+        ));
   }
 
   Widget buildFooter() {
@@ -359,13 +362,9 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          isPause
-              ? buildSaveButton()
-              : Container(height: 0.0, width: 0.0),
+          isPause ? buildSaveButton() : Container(height: 0.0, width: 0.0),
           buildRecordButton(),
-          isPause
-              ? buildClearButton()
-              : Container(height: 0.0, width: 0.0),
+          isPause ? buildClearButton() : Container(height: 0.0, width: 0.0),
         ],
       ),
     );
@@ -375,16 +374,16 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     return GestureDetector(
         onTap: () {
           print('cancel');
-          if(localVideo.segments.isEmpty){
+          if (localVideo.segments.isEmpty) {
             Navigator.of(context).pop();
-          }else{
+          } else {
             _deleteAllSegments();
           }
         },
         child: Container(
             width: 36,
             height: 36,
-			padding: EdgeInsets.all(10),
+            padding: EdgeInsets.all(10),
             child: Image.asset('assets/images/icRecordingExit.png',
                 fit: BoxFit.fill)));
   }
@@ -411,7 +410,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
         child: Container(
             width: 80,
             height: 80,
-			padding: EdgeInsets.all(22),
+            padding: EdgeInsets.all(22),
             child: Image.asset('assets/images/icRecording.png',
                 fit: BoxFit.fill)));
   }
@@ -424,20 +423,19 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
           } else {
             _startVideoRecording().then((String filePath) {
               if (filePath != null) {
-				_initTimer();
-				print('Saving video to $filePath');
-				setState(() {
-					isRecording = true;
-				});
-			  }
+                _initTimer();
+                print('Saving video to $filePath');
+                setState(() {
+                  isRecording = true;
+                });
+              }
             });
-            
           }
         },
         child: Container(
             width: 80,
             height: 80,
-			margin: EdgeInsets.fromLTRB(14, 0, 14, 0),
+            margin: EdgeInsets.fromLTRB(14, 0, 14, 0),
             child: Image.asset(
                 isRecording
                     ? 'assets/images/icRecordingPause.png'
@@ -449,12 +447,12 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     return GestureDetector(
         onTap: () {
           print('tapClear');
-         showMyMaterialDialog(context);
+          showMyMaterialDialog(context);
         },
         child: Container(
             width: 80,
             height: 80,
-			padding: EdgeInsets.all(22),
+            padding: EdgeInsets.all(22),
             child: Image.asset('assets/images/icRecordingDel.png',
                 fit: BoxFit.fill)));
   }
@@ -464,7 +462,8 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
         context: context,
         builder: (context) {
           return AlertDialog(
-            content: new Text("Are you sure you want to delete the last segment"),
+            content:
+                new Text("Are you sure you want to delete the last segment"),
             actions: <Widget>[
               FlatButton(
                 onPressed: () {
@@ -484,21 +483,21 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
         });
   }
 
-  void _deleteSegment(){
-    if(localVideo.segments.isNotEmpty){
+  void _deleteSegment() {
+    if (localVideo.segments.isNotEmpty) {
       Segment segment = localVideo.popSegment();
-      if(File(segment.path).existsSync()){
+      if (File(segment.path).existsSync()) {
         File(segment.path).delete();
       }
-      _counter -= (segment.duration*1000).toInt();
+      _counter -= (segment.duration * 1000).toInt();
       setState(() {});
     }
   }
 
-  void _deleteAllSegments(){
-    if(localVideo.segments.isNotEmpty){
-      localVideo.segments.forEach((segment){
-        if(File(segment.path).existsSync()){
+  void _deleteAllSegments() {
+    if (localVideo.segments.isNotEmpty) {
+      localVideo.segments.forEach((segment) {
+        if (File(segment.path).existsSync()) {
           File(segment.path).delete();
         }
       });
