@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -175,18 +176,21 @@ class HomePageState extends State<HomePage>
                 softWrap: true,
               ),
               SizedBox(height: 20),
-              SizedBox(
-                width: 74.5,
-                height: 28,
+              Container(
                 child: FlatButton(
                   child: Text(
                     isWatcher ? 'Watch' : 'Accept',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   onPressed: () {
                     isWatcher
                         ? Navigator.of(context).pushNamed('/watchRoom')
-                        : Navigator.of(context).pushNamed('/recordVideo');
+                        : PermissionHandler().requestPermissions([PermissionGroup.camera, PermissionGroup.microphone]).then((permissions){
+							final bool allGranted = permissions.values.every((value) => value == PermissionStatus.granted);
+							if(allGranted){
+								Navigator.of(context).pushNamed('/recordVideo');
+							}
+						});
                   },
                   color: Color.fromARGB(25, 255, 255, 255),
                   shape: RoundedRectangleBorder(

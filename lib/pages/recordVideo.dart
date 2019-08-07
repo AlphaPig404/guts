@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:gut/pages/videoEdit.dart';
 import 'package:gut/utils/common.dart';
 import 'package:gut/model/localVideo.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -66,17 +67,15 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     if (cameras.length > 0) {
       onNewCameraSelected(camerasIndex);
     } else {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        availableCameras().then((_cameras) {
-          print('ok');
-          cameras = _cameras;
-          if (cameras.length > 0) {
-            onNewCameraSelected(camerasIndex);
-          } else {
-            print('Error: avialibelCameras');
-          }
-        });
-      });
+      availableCameras().then((_cameras) {
+		print('ok');
+		cameras = _cameras;
+		if (cameras.length > 0) {
+		onNewCameraSelected(camerasIndex);
+		} else {
+		print('Error: avialibelCameras');
+		}
+	  });
     }
   }
 
@@ -178,8 +177,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     });
 
     try {
-      await controller.prepareForVideoRecording();
-      await controller.initialize();
+	  await controller.initialize();
     } on CameraException catch (_) {}
 
     if (mounted) {
