@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:gut/pages/videoEdit.dart';
+import 'package:gut/components/progressBar.dart';
 import 'package:gut/utils/common.dart';
 import 'package:gut/model/localVideo.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 List<CameraDescription> cameras = [];
+final lpbKey = GlobalKey<LinerProgressBarState>();
 
 class RecordPage extends StatefulWidget {
   @override
@@ -16,31 +16,19 @@ class RecordPage extends StatefulWidget {
 
 class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
   CameraController controller;
+  LinerProgressBar linerProgressBar;
   bool _isReady = false;
   int camerasIndex = 1;
   bool isRecording = false;
-  Timer _countdownTimer;
-  double _progereeRate = 0.0;
-  int _millisecondsCounter = 0;
   LocalVideo localVideo;
   String _segmentVideoPath;
   String _segmentVideoName;
   Segment _segmentVideo;
   final int limitSeconds = 15;
-  final int _millisecondsStep = 17;
   final String videoName = DateTime.now().millisecondsSinceEpoch.toString();
 
   bool get isPause {
     return !isRecording && localVideo.segments.isNotEmpty;
-  }
-
-  int get _counter {
-    return _millisecondsCounter;
-  }
-
-  set _counter(int count) {
-    _millisecondsCounter = count;
-    _progereeRate = _millisecondsCounter / (limitSeconds * 1000);
   }
 
   @override
@@ -59,6 +47,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
         segments: [],
         duration: 0.0,
         targetDuration: limitSeconds);
+	linerProgressBar = LinerProgressBar(localVideo: localVideo, key: lpbKey, pauseVideo: this.pauseVideo,);
   }
 
   void _setupCameras() {
@@ -105,7 +94,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
       _segmentVideo = Segment(
           name: '${videoName}_segment_${localVideo.segments.length}',
           path: _segmentVideoPath,
-          duration: _counter / 1000 - localVideo.duration);
+          duration: lpbKey.currentState.counter / 1000 - localVideo.duration);
       setState(() {
         localVideo.pushSement(_segmentVideo);
       });
@@ -115,33 +104,11 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     }
   }
 
-  void _initTimer() {
-    if (_countdownTimer != null) {
-      return;
-    }
-    _countdownTimer =
-        Timer.periodic(Duration(milliseconds: _millisecondsStep), (timer) {
-      //   print('tick');
-      if (_progereeRate < 1) {
-        setState(() {
-          _counter += _millisecondsStep;
-        });
-      } else {
-        pauseVideo();
-      }
-    });
-  }
-
-  void _clearTimer() {
-    _countdownTimer?.cancel();
-    _countdownTimer = null;
-  }
-
   void pauseVideo() {
     if (!isRecording) {
       return;
     }
-    _clearTimer();
+    lpbKey.currentState.clearTimer();
     setState(() {
       isRecording = false;
     });
@@ -254,7 +221,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
       padding: EdgeInsets.all(10),
       child: Column(
         children: <Widget>[
-          buildProgressBar(),
+          linerProgressBar,
           Container(
             padding: EdgeInsets.all(6),
             child: Row(
@@ -286,73 +253,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
       },
     );
   }
-
-  Widget buildProgressBar() {
-    Widget anchor = Container(
-      width: 2,
-      height: 6,
-      color: Colors.white,
-    );
-    List<Widget> buildAnchors() {
-      List<Widget> list = [];
-      double parentWidth = MediaQuery.of(context).size.width - 20;
-      localVideo.segments.asMap().forEach((index, segment) {
-        double _length = localVideo.segments
-            .sublist(0, index + 1)
-            .fold(0, (t, e) => t + e.duration);
-        double _left = parentWidth * (_length / localVideo.targetDuration);
-        list.add(Positioned(
-          left: _left,
-          child: anchor,
-        ));
-      });
-      return list;
-    }
-
-    return new Container(
-        height: 38,
-        child: Stack(
-          children: <Widget>[
-            Container(
-              child: Stack(
-                children: <Widget>[
-                  PhysicalModel(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(80.0),
-                    clipBehavior: Clip.antiAlias,
-                    child: LinearProgressIndicator(
-                      backgroundColor: Color.fromRGBO(209, 224, 224, 0.2),
-                      value: _progereeRate,
-                      valueColor: AlwaysStoppedAnimation(Colors.yellow[200]),
-                    ),
-                  ),
-                  Stack(
-                    children: buildAnchors(),
-                  )
-                ],
-              ),
-              height: 8,
-            ),
-            Positioned(
-              left: 0,
-              top: 10,
-              child: Text(
-                (_counter / 1000).toStringAsFixed(1),
-                style: TextStyle(fontSize: 10),
-              ),
-            ),
-            Positioned(
-              right: 0,
-              top: 10,
-              child: Text(
-                localVideo.targetDuration.toString(),
-                style: TextStyle(fontSize: 10),
-              ),
-            ),
-          ],
-        ));
-  }
-
+  
   Widget buildFooter() {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
@@ -421,7 +322,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
           } else {
             _startVideoRecording().then((String filePath) {
               if (filePath != null) {
-                _initTimer();
+                lpbKey.currentState.initTimer();
                 print('Saving video to $filePath');
                 setState(() {
                   isRecording = true;
@@ -487,7 +388,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
       if (File(segment.path).existsSync()) {
         File(segment.path).delete();
       }
-      _counter -= (segment.duration * 1000).toInt();
+      lpbKey.currentState.counter -= (segment.duration * 1000).toInt();
       setState(() {});
     }
   }
@@ -500,7 +401,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
         }
       });
       localVideo.clear();
-      _counter = 0;
+      lpbKey.currentState.counter = 0;
       setState(() {});
     }
   }
