@@ -176,7 +176,10 @@ class HomePageState extends State<HomePage>
               ),
               SizedBox(height: 20),
               Container(
+				width: 74.5,
+				height: 28,
                 child: FlatButton(
+				  padding: EdgeInsets.all(0),
                   child: Text(
                     isWatcher ? 'Watch' : 'Accept',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
