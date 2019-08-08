@@ -104,7 +104,7 @@ class HomePageState extends State<HomePage>
         IconButton(
           icon: Icon(Icons.settings),
           onPressed: () {
-            Navigator.of(context).pushNamed('/recordVideo');
+            Navigator.of(context).pushNamed('/movieList');
           },
         )
       ],
@@ -119,7 +119,6 @@ class HomePageState extends State<HomePage>
         final index = i ~/ 2;
         // If you've reached at the end of the available word pairs...
         if (index >= videoList.length) {
-          // ...接着再生成10个单词对，然后添加到建议列表
           videoList.addAll(['aaa']);
         }
         return _buildRow(tabName, videoList[index]);

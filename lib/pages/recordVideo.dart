@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:gut/components/progressBar.dart';
 import 'package:gut/utils/common.dart';
 import 'package:gut/model/localVideo.dart';
+import 'package:flutter/cupertino.dart';
 
 List<CameraDescription> cameras = [];
 final lpbKey = GlobalKey<LinerProgressBarState>();
@@ -47,7 +48,11 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
         segments: [],
         duration: 0.0,
         targetDuration: limitSeconds);
-	linerProgressBar = LinerProgressBar(localVideo: localVideo, key: lpbKey, pauseVideo: this.pauseVideo,);
+    linerProgressBar = LinerProgressBar(
+      localVideo: localVideo,
+      key: lpbKey,
+      pauseVideo: this.pauseVideo,
+    );
   }
 
   void _setupCameras() {
@@ -57,14 +62,14 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
       onNewCameraSelected(camerasIndex);
     } else {
       availableCameras().then((_cameras) {
-		print('ok');
-		cameras = _cameras;
-		if (cameras.length > 0) {
-		onNewCameraSelected(camerasIndex);
-		} else {
-		print('Error: avialibelCameras');
-		}
-	  });
+        print('ok');
+        cameras = _cameras;
+        if (cameras.length > 0) {
+          onNewCameraSelected(camerasIndex);
+        } else {
+          print('Error: avialibelCameras');
+        }
+      });
     }
   }
 
@@ -144,7 +149,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     });
 
     try {
-	  await controller.initialize();
+      await controller.initialize();
     } on CameraException catch (_) {}
 
     if (mounted) {
@@ -202,11 +207,6 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
             child: buildHeader(),
           ),
           Positioned(
-            right: 10,
-            top: 200,
-            child: buildFileList(),
-          ),
-          Positioned(
             bottom: 14,
             child: buildFooter(),
           )
@@ -245,15 +245,6 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget buildFileList() {
-    return IconButton(
-      icon: Icon(Icons.filter),
-      onPressed: () {
-        Navigator.of(context).pushNamed('/movieList');
-      },
-    );
-  }
-  
   Widget buildFooter() {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
@@ -276,7 +267,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
           if (localVideo.segments.isEmpty) {
             Navigator.of(context).pop();
           } else {
-            _deleteAllSegments();
+            showCancelDialog(context);
           }
         },
         child: Container(
@@ -346,7 +337,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     return GestureDetector(
         onTap: () {
           print('tapClear');
-          showMyMaterialDialog(context);
+          showClearDialog(context);
         },
         child: Container(
             width: 80,
@@ -356,26 +347,74 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
                 fit: BoxFit.fill)));
   }
 
-  void showMyMaterialDialog(BuildContext context) {
-    showDialog(
+  void showClearDialog(BuildContext context) {
+    showCupertinoDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            content:
-                new Text("Are you sure you want to delete the last segment"),
+          return CupertinoAlertDialog(
+            content: new Text(
+              "Are you sure you want to delete the last segment",
+              style: TextStyle(fontSize: 16),
+            ),
             actions: <Widget>[
               FlatButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text("Cancel"),
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
               ),
               FlatButton(
                 onPressed: () {
                   _deleteSegment();
                   Navigator.of(context).pop();
                 },
-                child: Text("Confirm"),
+                child: Text(
+                  "Confirm",
+                  style: TextStyle(color: Colors.blue, fontSize: 16),
+                ),
+              ),
+            ],
+          );
+        });
+  }
+
+  void showCancelDialog(BuildContext context) {
+    showCupertinoDialog(
+        context: context,
+        builder: (context) {
+          return CupertinoAlertDialog(
+            content: new Text(
+              "Are you sure you want to abandon the segments",
+              style: TextStyle(fontSize: 16),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+              ),
+              FlatButton(
+                onPressed: () {
+                  _deleteAllSegments();
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  "Confirm",
+                  style: TextStyle(color: Colors.blue, fontSize: 16),
+                ),
               ),
             ],
           );

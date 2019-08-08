@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io';
 import 'package:gut/model/localVideo.dart';
+import 'dart:async';
+import 'package:gut/components/activeText.dart';
+
+final GlobalKey<ActiveTextState> _textKey = GlobalKey<ActiveTextState>();
 
 class VideoEditPage extends StatefulWidget {
   VideoEditPage({@required this.localVideo});
@@ -12,16 +16,12 @@ class VideoEditPage extends StatefulWidget {
   createState() => VideoEditPageState();
 }
 
-class VideoEditPageAguments {
-  final String videoPath;
-  VideoEditPageAguments(this.videoPath);
-}
-
 class VideoEditPageState extends State<VideoEditPage> {
   VideoPlayerController _currentController;
   List<VideoPlayerController> _controllerList = [];
   int currentIndex = 0;
   List<Segment> segments;
+  bool _uploading = false;
 
   @override
   void initState() {
@@ -38,15 +38,15 @@ class VideoEditPageState extends State<VideoEditPage> {
       if (currentIndex != i) {
         controller.initialize();
       }
-	  controller.addListener(videoListener);
+      controller.addListener(videoListener);
       _controllerList.add(controller);
     });
     _currentController = _controllerList[currentIndex];
     _currentController.initialize().then((ov) {
-		print('$currentIndex');
-		setState(() {
-			_currentController.play();
-		});
+      print('$currentIndex');
+      setState(() {
+        _currentController.play();
+      });
     });
   }
 
@@ -76,38 +76,64 @@ class VideoEditPageState extends State<VideoEditPage> {
   @override
   Widget build(BuildContext context) {
     print('build ${_currentController.value.initialized}');
-	
     final size = MediaQuery.of(context).size;
     final deviceRatio = size.width / size.height;
-	
+
+    Widget _buildUploadButton(BuildContext _context) {
+      return IconButton(
+        icon: Icon(Icons.cloud_upload),
+        onPressed: () {
+          if (_uploading) {
+            return;
+          }
+          setState(() {
+            _uploading = true;
+          });
+          final ActiveText activeText = ActiveText(key: _textKey);
+          final SnackBar snackBar = SnackBar(
+            duration: Duration(minutes: 1),
+            content: activeText,
+            action: SnackBarAction(
+              label: 'Confirm',
+              onPressed: () {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/home', (Route<dynamic> route) => false);
+              },
+            ),
+          );
+          Scaffold.of(_context).showSnackBar(snackBar);
+          Future.delayed(Duration(milliseconds: 20), () {
+            _textKey.currentState.start('Proccess');
+            widget.localVideo.concatSegments().then((ret) {
+              if (ret == 0) {
+                print('upload');
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    '/home', (Route<dynamic> route) => false);
+              }
+            });
+          });
+        },
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Post'),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.cloud_upload),
-            onPressed: () {
-              setState(() {
-                _currentController.pause();
-                widget.localVideo.concatSegments().then((onValue) {
-                  print('upload');
-                });
-              });
-            },
-          )
+          Builder(builder: (_context) => _buildUploadButton(_context))
         ],
       ),
       body: _currentController.value.initialized
           ? Container(
               child: Transform.scale(
-                scale: _currentController.value.aspectRatio / deviceRatio,
-                child: Center(
-                  child: AspectRatio(
-                    aspectRatio: _currentController.value.aspectRatio,
-                    child: VideoPlayer(_currentController),
-                  ),
+              scale: _currentController.value.aspectRatio / deviceRatio,
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: _currentController.value.aspectRatio,
+                  child: VideoPlayer(_currentController),
                 ),
-              ))
+              ),
+            ))
           : Center(child: CircularProgressIndicator()),
     );
   }
