@@ -56,7 +56,7 @@ class HomePageState extends State<HomePage>
 
   Widget _buildAppBar() {
     final Color selecedTabColor = Color.fromARGB(255, 99, 99, 102);
-    print('build');
+    print('build home');
     List<Widget> _buildTabButtons() {
       List<Widget> tabs = [];
       Widget tab;
