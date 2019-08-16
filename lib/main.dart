@@ -37,7 +37,7 @@ void main() async {
   final storage = FlutterSecureStorage();
   String value = await storage.read(key: 'user');
   Widget _indexPage; 
-  if(value.isNotEmpty){
+  if(value != null && value.isNotEmpty){
 	_indexPage = HomePage();
 	Common.user = User.fromJson(JSON.jsonDecode(value));
   }else{

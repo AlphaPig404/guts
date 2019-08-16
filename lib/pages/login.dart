@@ -238,7 +238,7 @@ class LoginFormState extends State<LoginForm> {
           children: <Widget>[
             container,
             Expanded(
-              child: TextFormField(
+              child: TextField(
                 keyboardType: TextInputType.phone,
                 cursorColor: Colors.white,
                 inputFormatters: [
@@ -271,7 +271,7 @@ class LoginFormState extends State<LoginForm> {
               border: Border.all(
                   width: 1.0, color: Color.fromARGB(51, 255, 255, 255)),
               borderRadius: BorderRadius.all(Radius.circular(5))),
-          child: TextFormField(
+          child: TextField(
             keyboardType: TextInputType.number,
             cursorColor: Colors.white,
             inputFormatters: [
