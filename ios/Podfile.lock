@@ -12,6 +12,8 @@ PODS:
     - Flutter
   - "permission_handler (3.2.1+1)":
     - Flutter
+  - screen (0.0.1):
+    - Flutter
   - video_player (0.0.1):
     - Flutter
 
@@ -22,6 +24,7 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
+  - screen (from `.symlinks/plugins/screen/ios`)
   - video_player (from `.symlinks/plugins/video_player/ios`)
 
 SPEC REPOS:
@@ -41,6 +44,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
+  screen:
+    :path: ".symlinks/plugins/screen/ios"
   video_player:
     :path: ".symlinks/plugins/video_player/ios"
 
@@ -52,6 +57,7 @@ SPEC CHECKSUMS:
   mobile-ffmpeg-full: ef35cde76b752a4a1479a8128ba7e970a4ccbafb
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
   permission_handler: 6a1b2f94f866da8bd19fa67f3c8f4b9f38580efb
+  screen: abd91ca7bf3426e1cc3646d27e9b2358d6bf07b0
   video_player: 3964090a33353060ed7f58aa6427c7b4b208ec21
 
 PODFILE CHECKSUM: 52b9085790671f87c30875db9bf256d809692787

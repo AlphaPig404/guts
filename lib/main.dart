@@ -11,8 +11,12 @@ import 'package:gut/pages/watchRoom2.dart';
 import 'package:gut/utils/common.dart';
 import 'package:gut/utils/movieDir.dart';
 import 'package:gut/model/localVideo.dart';
+import 'package:gut/pages/TopUp.dart';
+import 'package:gut/pages/WatchVideoList.dart';
+import 'package:gut/pages/PlayVideo.dart';
 import 'model/user.dart';
 import 'dart:convert' as JSON;
+
 
 const SystemUiOverlayStyle light = SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF000000),
@@ -55,7 +59,10 @@ class Gut extends StatelessWidget{
         '/home': (BuildContext context) => new HomePage(),
 		'/recordVideo': (BuildContext context) => new RecordPage(),
 		'/movieList': (BuildContext context) => new MovieListPage(),
-		'/watchRoom': (BuildContext context) => new WatchRoomPage()
+		'/watchRoom': (BuildContext context) => new WatchRoomPage(),
+    '/topup': (BuildContext context) => new TopUp(),
+    '/playVideo': (BuildContext context) => new PlayVideo(),
+    '/watchVideoList': (BuildContext context) => new WatchVideoList(),
   };
   final Widget home;
  
