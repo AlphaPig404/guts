@@ -1,6 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as prefix0;
+import 'package:gut/model/challenge.dart';
+import 'package:gut/utils/common.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:gut/utils/api.dart';
+import 'package:dio/dio.dart';
+import 'dart:convert' as JSON;
 
 class HomePage extends StatefulWidget {
   @override
@@ -11,7 +17,8 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  List<String> videoList = [];
+  List<Challenge> playerChallengeList = [];
+  List<Challenge> watcherChallengeList = [];
   TabController _tabController;
   int selectTabIndex = 0;
   List<String> tabList = ['Player', 'Watcher'];
@@ -29,12 +36,30 @@ class HomePageState extends State<HomePage>
           });
         }
       });
+	getChallengeList('player');
+	getChallengeList('watcher');
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void getChallengeList(String tabName) async{
+	if(tabName == 'player'){
+		Response response = await Common.dio.get('${Apis.getChallengeList}?role=0&uid=10013');
+		List _challengeList = response.data;
+		setState(() {
+			playerChallengeList = _challengeList.map((challenge) => Challenge.fromJson(challenge)).toList();
+		});
+	}else if(tabName == 'watcher'){
+		Response response = await Common.dio.get('${Apis.getChallengeList}?role=1&uid=10013');
+		List _challengeList = response.data;
+		setState(() {
+			watcherChallengeList = _challengeList.map((challenge) => Challenge.fromJson(challenge)).toList();
+		});
+	}
   }
 
   @override
@@ -112,21 +137,27 @@ class HomePageState extends State<HomePage>
   }
 
   Widget _buildSuggestions(String tabName) {
-    return new ListView.builder(
+	if(tabName == 'player'){
+		return buildPlayerChanlenge(tabName, playerChallengeList);
+	}else{
+		return buildPlayerChanlenge(tabName, watcherChallengeList);
+	}
+  }
+
+  Widget buildPlayerChanlenge(tabName, challengeList){
+	return new ListView.separated(
       padding: const EdgeInsets.all(10.0),
+	  itemCount: challengeList.length,
       itemBuilder: (context, i) {
-        if (i.isOdd) return Divider();
-        final index = i ~/ 2;
-        // If you've reached at the end of the available word pairs...
-        if (index >= videoList.length) {
-          videoList.addAll(['aaa']);
-        }
-        return _buildRow(tabName, videoList[index]);
+        return _buildRow(tabName, challengeList[i]);
+      },
+	  separatorBuilder: (BuildContext context, int index) {
+        return Divider();
       },
     );
   }
 
-  Widget buildTitleSection() {
+  Widget buildTitleSection(Challenge challenge) {
     return Row(
       children: <Widget>[
         Expanded(
@@ -141,7 +172,9 @@ class HomePageState extends State<HomePage>
                       color: Colors.green),
                   margin: EdgeInsets.only(right: 10),
                 ),
-                Text('Easy')
+                Text(
+					challenge.level
+				)
               ],
             ),
           ),
@@ -150,12 +183,12 @@ class HomePageState extends State<HomePage>
           padding: EdgeInsets.only(right: 10),
           child: buildIcon(Icons.play_arrow, '0:50'),
         ),
-        buildIcon(Icons.favorite, '888Point')
+        buildIcon(Icons.favorite, '${challenge.point} Point')
       ],
     );
   }
 
-  Widget buildDetailSection(String tabName) {
+  Widget buildDetailSection(String tabName, Challenge challenge) {
     final bool isWatcher = tabName == 'Watcher';
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,12 +198,13 @@ class HomePageState extends State<HomePage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Sing in a full resturant',
+                challenge.title,
+				softWrap: true,
                 style: Theme.of(context).textTheme.title,
               ),
               SizedBox(height: 4),
               Text(
-                'Wherever you are, please sing in aaaa full resturant',
+                challenge.description,
                 style: TextStyle(color: Color.fromARGB(255, 132, 132, 132)),
                 softWrap: true,
               ),
@@ -204,13 +238,13 @@ class HomePageState extends State<HomePage>
           ),
         ),
         Container(
-          width: 84,
-          height: 84,
+          width: 92,
+          height: 92,
           padding: EdgeInsets.only(left: 4),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(10)),
               image: DecorationImage(
-                image: NetworkImage('https://picsum.photos/250?image=9'),
+                image: NetworkImage(challenge.cover),
                 fit: BoxFit.cover,
               )),
         )
@@ -235,14 +269,14 @@ class HomePageState extends State<HomePage>
     );
   }
 
-  Widget _buildRow(String tabName, video) {
+  Widget _buildRow(String tabName, Challenge challenge) {
     return Container(
       padding: EdgeInsets.all(15),
       child: Column(
         children: <Widget>[
-          buildTitleSection(),
+          buildTitleSection(challenge),
           SizedBox(height: 20),
-          buildDetailSection(tabName),
+          buildDetailSection(tabName, challenge),
         ],
       ),
     );

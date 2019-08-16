@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gut/pages/example.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:gut/pages/movieList.dart';
 import 'package:gut/pages/recordVideo.dart';
 import 'package:gut/pages/home.dart';
 import 'package:gut/pages/login.dart';
 import 'package:gut/pages/register.dart';
 import 'package:gut/pages/videoEdit.dart';
-import 'package:gut/pages/watchRoom.dart';
+import 'package:gut/pages/watchRoom2.dart';
+import 'package:gut/utils/common.dart';
 import 'package:gut/utils/movieDir.dart';
-import 'pages/welcome.dart';
 import 'package:gut/model/localVideo.dart';
+import 'model/user.dart';
+import 'dart:convert' as JSON;
 
 const SystemUiOverlayStyle light = SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF000000),
@@ -32,11 +34,21 @@ const SystemUiOverlayStyle dark = SystemUiOverlayStyle(
 
 void main() async {
   await MovieDir().init();
-  runApp(Gut());
+  final storage = FlutterSecureStorage();
+  String value = await storage.read(key: 'user');
+  Widget _indexPage; 
+  if(value.isNotEmpty){
+	_indexPage = HomePage();
+	Common.user = User.fromJson(JSON.jsonDecode(value));
+  }else{
+	_indexPage = LoginPage();
+  }
+  runApp(Gut(home: _indexPage));
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
 }
 
 class Gut extends StatelessWidget{
+   Gut({this.home});
    final Map<String, WidgetBuilder> routes= <String, WidgetBuilder>{
         '/login': (BuildContext context) => new LoginPage(),
         '/register': (BuildContext context) => new RegisterPage(),
@@ -45,6 +57,8 @@ class Gut extends StatelessWidget{
 		'/movieList': (BuildContext context) => new MovieListPage(),
 		'/watchRoom': (BuildContext context) => new WatchRoomPage()
   };
+  final Widget home;
+ 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -72,7 +86,7 @@ class Gut extends StatelessWidget{
 			 	return MaterialPageRoute(builder: routes[settings.name]);
 		  }
 	  },
-      home: new LoginPage()
+      home: home
     );
   }
 }

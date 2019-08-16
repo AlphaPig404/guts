@@ -1,8 +1,14 @@
+import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert' as JSON;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:gut/utils/api.dart';
+import 'package:gut/utils/common.dart';
+import 'package:toast/toast.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -83,13 +89,20 @@ class LoginForm extends StatefulWidget {
 
 class LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
-  String _captcha, _phone;
+  final storage = new FlutterSecureStorage();
+  String _captcha='', _phone='';
   String areaCodes = '';
-  var selectItemValue;
+  String _areaCode = '65';
+  bool _isSendCaptcha = false;
+  int _countDown = 60;
 
   @override
   void initState() {
+    initAreaCode();
     super.initState();
+  }
+
+  void initAreaCode() {
     Future<String> loadString =
         rootBundle.loadString('assets/data/area_code.json');
     loadString.then((String value) {
@@ -118,8 +131,42 @@ class LoginFormState extends State<LoginForm> {
         ));
   }
 
-  void _submitValues() {
-    Navigator.of(context).popAndPushNamed('/home');
+  void _submitValues() async {
+    if (_phone.isNotEmpty && _captcha.isNotEmpty) {
+      try {
+        Response response = await Common.dio.post(Apis.login,
+            data: {"area_code": _areaCode, "code": _captcha, "phone": _phone});	
+		await storage.write(key: 'user', value: response.toString());
+        Navigator.of(context).popAndPushNamed('/home');
+      } on DioError catch (e) {
+        if (e.response != null) {
+		  Toast.show(e.response.data['msg'], context,duration: Toast.LENGTH_LONG);
+        } else {
+          print(e.request);
+          print(e.message);
+        }
+      }
+    }
+  }
+
+  void startCountDown() {
+    setState(() {
+      _isSendCaptcha = true;
+    });
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_countDown > 0) {
+        setState(() {
+          _countDown--;
+        });
+      } else {
+        timer.cancel();
+        timer = null;
+        setState(() {
+          _isSendCaptcha = false;
+          _countDown = 60;
+        });
+      }
+    });
   }
 
   Widget buildSubmitButton() {
@@ -152,7 +199,8 @@ class LoginFormState extends State<LoginForm> {
         list.forEach((value) {
           String str = value as String;
           items.add(DropdownMenuItem(
-              value: str.split(',')[1], child: Text(str.split(',')[1])));
+              value: (str.split(',')[1]).substring(1),
+              child: Text(str.split(',')[1])));
         });
       }
       return items;
@@ -167,13 +215,13 @@ class LoginFormState extends State<LoginForm> {
               items: generateItemList(),
               isExpanded: true,
               hint: Text(
-                '+966',
+                '+65',
                 style: Theme.of(context).textTheme.body1,
               ),
-              value: selectItemValue,
-              onChanged: (T) {
+              value: _areaCode,
+              onChanged: (value) {
                 setState(() {
-                  selectItemValue = T;
+                  _areaCode = value;
                 });
               },
             ),
@@ -201,13 +249,11 @@ class LoginFormState extends State<LoginForm> {
                     border: InputBorder.none,
                     hasFloatingPlaceholder: false,
                     contentPadding: EdgeInsets.fromLTRB(12.5, 15, 12.5, 15)),
-                validator: (String value) {
-                  var phoneReg = RegExp(r"^\d+$");
-                  if (!phoneReg.hasMatch(value)) {
-                    return 'Please Input the right phone number';
-                  }
+                onChanged: (String value) {
+                  setState(() {
+                    _phone = value;
+                  });
                 },
-                onSaved: (String value) => _phone = value,
               ),
             )
           ],
@@ -236,24 +282,42 @@ class LoginFormState extends State<LoginForm> {
                 hasFloatingPlaceholder: false,
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.fromLTRB(12.5, 15, 12.5, 15)),
-            validator: (String value) {
-              if (value.isEmpty) {
-                return 'Please input the captcha';
-              }
+            onChanged: (String value) {
+              setState(() {
+                _captcha = value;
+              });
             },
-            onSaved: (String value) => _captcha = value,
           ),
         )),
-        ButtonTheme(
-            minWidth: 50.0,
-            child: FlatButton(
-              child: Text(
-                'Send OTP',
-                style: TextStyle(color: Color.fromARGB(255, 255, 210, 0)),
-              ),
-              onPressed: () {},
-              padding: null,
-            ))
+        _isSendCaptcha
+            ? Container(
+                width: 80.0,
+                height: 48.0,
+                child: Center(
+                    child: Text(
+                  '$_countDown s',
+                )))
+            : ButtonTheme(
+                minWidth: 50.0,
+                child: FlatButton(
+                  child: Text(
+                    'Send OTP',
+                    style: TextStyle(color: Color.fromARGB(255, 255, 210, 0)),
+                  ),
+                  onPressed: () {
+                    if (_phone.isNotEmpty) {
+                      startCountDown();
+                      Common.dio.post(Apis.getCode, data: {
+                        "phone": _phone,
+                        "area_code": _areaCode,
+                        "user_agent": ''
+                      }).then((res) {
+                        print('send otp');
+                      });
+                    }
+                  },
+                  padding: null,
+                ))
       ],
     );
   }

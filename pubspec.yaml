@@ -25,10 +25,13 @@ dependencies:
   cupertino_icons: ^0.1.2
   flutter_swiper : ^1.1.6
   camera: ^0.5.2+2
-  path_provider: ^0.5.0
+  path_provider: ^1.1.0
   video_player: ^0.10.0
   flutter_ffmpeg: ^0.2.7
   permission_handler: '^3.2.0'
+  dio: ^2.1.13
+  toast: ^0.1.5
+  flutter_secure_storage: 3.2.1+1
 
 
 dev_dependencies:
