@@ -3,9 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:dio/dio.dart';
 import './../utils/common.dart';
 import 'dart:async';
-import './../utils/API.dart';
 
-// final API _api = API();
 
 class TopUp extends StatefulWidget{
   @override
@@ -26,8 +24,7 @@ class TopUpState extends State<TopUp> {
   }
   
   void gethttp() async {
-    String requestUrl = API.baseUrl + "video/explore-videos";
-    print(requestUrl);
+    
     try{
       var response = await Dio().get(testurl);
       Timer(new Duration(seconds: 3), 
