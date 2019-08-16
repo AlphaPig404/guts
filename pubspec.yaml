@@ -29,6 +29,9 @@ dependencies:
   video_player: ^0.10.0
   flutter_ffmpeg: ^0.2.7
   permission_handler: '^3.2.0'
+  chewie: 0.9.7
+  flutter_screenutil: ^0.5.3
+  dio: 2.1.0
 
 
 dev_dependencies:
