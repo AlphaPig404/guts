@@ -6,6 +6,7 @@ import 'dart:convert' as JSON;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:gut/model/user.dart';
 import 'package:gut/utils/api.dart';
 import 'package:gut/utils/common.dart';
 import 'package:toast/toast.dart';
@@ -136,6 +137,7 @@ class LoginFormState extends State<LoginForm> {
       try {
         Response response = await Common.dio.post(Apis.login,
             data: {"area_code": _areaCode, "code": _captcha, "phone": _phone});	
+		Common.user = User.fromJson(JSON.jsonDecode(response.data));
 		await storage.write(key: 'user', value: response.toString());
         Navigator.of(context).popAndPushNamed('/home');
       } on DioError catch (e) {

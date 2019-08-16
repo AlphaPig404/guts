@@ -7,4 +7,5 @@ class Apis {
 
 	static final String acceptChallenge = '/challenge/accept';
 	static final String uploadVideo = '/video/upload';
+	static final String upload = '/file/upload';
 }

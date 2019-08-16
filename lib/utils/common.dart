@@ -13,6 +13,10 @@ Dio initDio() {
   );
   Dio dio = Dio(options);
   dio.interceptors.add(InterceptorsWrapper(onRequest: (options) async{
+	  if(options.path == Apis.upload){
+		options.baseUrl = 'https://webapi-loopstest.shabikplus.mozat.com';
+		return options;
+	  }
 	  if(options.path == Apis.login || options.path == Apis.getCode || options.path == Apis.refreshAccessToken){
 		return options; 
 	  }else{
@@ -27,9 +31,11 @@ Dio initDio() {
 
 class Common {
   static final String movieAbsolutePath = 'Movies';
+  static final String imgAbsolutePath = 'Img';
   static final String cacheAbsolutePath = 'Cache';
   static Directory movieDir;
   static Directory cache;
+  static Directory imgDir;
   static final Dio dio = initDio();
   static User user;
 }

@@ -193,24 +193,21 @@ class HomePageState extends State<HomePage>
     );
   }
 
-  void acceptChallenge(int chanllengeId) async {
+  void acceptChallenge(Challenge chanllenge) async {
     //   acceptChallenge
     Response response = await Common.dio.post(Apis.acceptChallenge,
-        data: {"challenge_id": chanllengeId, "uid": Common.user.uid});
-    if (response.data) {
-      PermissionHandler().requestPermissions([
-        PermissionGroup.camera,
-        PermissionGroup.microphone
-      ]).then((permissions) {
-        final bool allGranted = permissions.values
-            .every((value) => value == PermissionStatus.granted);
-        if (allGranted) {
-          Navigator.of(context).pushNamed('/recordVideo');
-        }
-      });
-    }else{
-		Toast.show('Already accept this challenge', context,duration: Toast.LENGTH_LONG);
-	}
+        data: {"challenge_id": chanllenge.id, "uid": Common.user.uid});
+    print(response.data);
+    PermissionHandler().requestPermissions([
+      PermissionGroup.camera,
+      PermissionGroup.microphone
+    ]).then((permissions) {
+      final bool allGranted = permissions.values
+          .every((value) => value == PermissionStatus.granted);
+      if (allGranted) {
+        Navigator.of(context).pushNamed('/recordVideo', arguments: chanllenge);
+      }
+    });
   }
 
   Widget buildDetailSection(String tabName, Challenge challenge) {
@@ -246,7 +243,7 @@ class HomePageState extends State<HomePage>
                   onPressed: () {
                     isWatcher
                         ? Navigator.of(context).pushNamed('/watchRoom')
-                        : acceptChallenge(challenge.id);
+                        : acceptChallenge(challenge);
                   },
                   color: Color.fromARGB(25, 255, 255, 255),
                   shape: RoundedRectangleBorder(

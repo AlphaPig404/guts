@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:gut/model/challenge.dart';
 import 'package:gut/pages/movieList.dart';
 import 'package:gut/pages/recordVideo.dart';
 import 'package:gut/pages/home.dart';
@@ -89,6 +90,9 @@ class Gut extends StatelessWidget{
 			 case '/videoEdit':
 			 	final LocalVideo args = settings.arguments;
 			 	return MaterialPageRoute(builder: (context)=>VideoEditPage(localVideo: args));
+			 case '/recordVideo':
+			    final Challenge args = settings.arguments;
+			 	return MaterialPageRoute(builder: (context)=> RecordPage(challenge: args));
 			 default: 
 			 	return MaterialPageRoute(builder: routes[settings.name]);
 		  }

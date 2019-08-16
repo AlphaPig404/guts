@@ -5,17 +5,21 @@ import 'package:gut/utils/common.dart';
 class LocalVideo{
   String name;
   String path;
+  String coverImage;
   double duration;
   List<Segment> segments=[];
   int targetDuration;
+  int challengId;
   static FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
 
-  LocalVideo({String name, String path, double duration, List<Segment> segments, int targetDuration}){
+  LocalVideo({String name, String path, double duration, List<Segment> segments, int targetDuration, int challengId, String coverImage}){
     this.name = name;
     this.path = path;
     this.duration = duration;
     this.segments = segments;
     this.targetDuration = targetDuration;
+	this.challengId = challengId;
+	this.coverImage = coverImage;
   }
 
   Segment popSegment(){
@@ -40,7 +44,9 @@ class LocalVideo{
 
   Future<int> concatSegments() async {
     if(segments.isEmpty){ return 1;}
-    final inputFileName = '${Common.cache.path}/$name.txt';
+    final String inputFileName = '${Common.cache.path}/$name.txt';
+	final int middleTime = duration~/2;
+	print(middleTime);
     File inputFile = File(inputFileName);
     IOSink ism =inputFile.openWrite();
     segments.forEach((segment){
@@ -49,6 +55,7 @@ class LocalVideo{
     await ism.flush();
     await ism.close();
     await _flutterFFmpeg.execute("-f concat -safe 0 -i $inputFileName $path");
+	await _flutterFFmpeg.execute("-ss $middleTime -i $path -y -f mjpeg -vframes 1 $coverImage");
     return 0;
   }
 }
