@@ -9,6 +9,7 @@ import 'package:gut/model/localVideo.dart';
 import 'dart:async';
 import 'package:gut/components/activeText.dart';
 import 'dart:convert' as JSON;
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 final GlobalKey<ActiveTextState> _textKey = GlobalKey<ActiveTextState>();
 
@@ -79,18 +80,23 @@ class VideoEditPageState extends State<VideoEditPage> {
   }
 
   Future<void> uploadVideo() async {
-	final LocalVideo localVideo = widget.localVideo;
-	FormData videoFormData = new FormData.from({
-		"saveFolder": "gut/${Common.user.uid}/video",
-		"file": new UploadFileInfo(new File(localVideo.path), '${localVideo.name}.mp4')
-	});
-	FormData coverFormData = new FormData.from({
-		"saveFolder": "gut/${Common.user.uid}/cover",
-		"file": new UploadFileInfo(new File(localVideo.coverImage), '${localVideo.name}.jpg')
-	});
-	List<Response> res = await Future.wait([Common.dio.post(Apis.upload, data: videoFormData), Common.dio.post(Apis.upload, data: coverFormData)]);
-	String videoUrl = JSON.jsonDecode(res[0].data)["url"];
-	String coverUrl = JSON.jsonDecode(res[1].data)["url"];
+    final LocalVideo localVideo = widget.localVideo;
+    FormData videoFormData = new FormData.from({
+      "saveFolder": "gut/${Common.user.uid}/video",
+      "file": new UploadFileInfo(
+          new File(localVideo.path), '${localVideo.name}.mp4')
+    });
+    FormData coverFormData = new FormData.from({
+      "saveFolder": "gut/${Common.user.uid}/cover",
+      "file": new UploadFileInfo(
+          new File(localVideo.coverImage), '${localVideo.name}.jpg')
+    });
+    List<Response> res = await Future.wait([
+      Common.dio.post(Apis.upload, data: videoFormData),
+      Common.dio.post(Apis.upload, data: coverFormData)
+    ]);
+    String videoUrl = JSON.jsonDecode(res[0].data)["url"];
+    String coverUrl = JSON.jsonDecode(res[1].data)["url"];
 
     return Common.dio.post(Apis.uploadVideo, data: {
       "video_url": videoUrl,
@@ -116,72 +122,40 @@ class VideoEditPageState extends State<VideoEditPage> {
           setState(() {
             _uploading = true;
           });
-		  widget.localVideo.concatSegments().then((ret) async {
-			if (ret == 0) {
-				await uploadVideo();
-				Navigator.of(context).pushNamedAndRemoveUntil(
-					'/home', (Route<dynamic> route) => false);
-			} else {
-				Toast.show('Proccess error', context);
-			}
-		  });
-        //   final ActiveText activeText = ActiveText(key: _textKey);
-        //   final SnackBar snackBar = SnackBar(
-        //     duration: Duration(minutes: 1),
-        //     content: activeText,
-        //     action: SnackBarAction(
-        //       label: 'Confirm',
-        //       onPressed: () {
-        //         Navigator.of(context).pushNamedAndRemoveUntil(
-        //             '/home', (Route<dynamic> route) => false);
-        //       },
-        //     ),
-        //   );
-        //   Scaffold.of(_context).showSnackBar(snackBar);
-        //   Future.delayed(Duration(milliseconds: 20), () {
-        //     _textKey.currentState.start('Proccess');
-        //     widget.localVideo.concatSegments().then((ret) async {
-        //       if (ret == 0) {
-		// 		await uploadVideo();
-        //         Navigator.of(context).pushNamedAndRemoveUntil(
-        //             '/home', (Route<dynamic> route) => false);
-        //       } else {
-        //         Toast.show('Proccess error', context);
-        //       }
-        //     });
-        //   });
+          widget.localVideo.concatSegments().then((ret) async {
+            if (ret == 0) {
+              await uploadVideo();
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/home', (Route<dynamic> route) => false);
+            } else {
+              Toast.show('Proccess error', context);
+            }
+          });
         },
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Post'),
-        actions: <Widget>[
-          Builder(builder: (_context) => _buildUploadButton(_context))
-        ],
-      ),
-      body: Stack(
-		  children: <Widget>[
-			_currentController.value.initialized
-			? Container(
-				child: Transform.scale(
-				scale: _currentController.value.aspectRatio / deviceRatio,
-				child: Center(
-					child: AspectRatio(
-					aspectRatio: _currentController.value.aspectRatio,
-					child: VideoPlayer(_currentController),
-					),
-				),
-				))
-			: Center(child: CircularProgressIndicator()),
-			!_uploading ? Container(
-				width: 0,
-				height: 0,
-			) : Center(child: CircularProgressIndicator())
-		  ],
-	  )
-    );
+        appBar: AppBar(
+          title: Text('Post'),
+          actions: <Widget>[
+            Builder(builder: (_context) => _buildUploadButton(_context))
+          ],
+        ),
+        body: ModalProgressHUD(
+            inAsyncCall: _uploading,
+            child: _currentController.value.initialized
+                ? Container(
+                    child: Transform.scale(
+                    scale: _currentController.value.aspectRatio / deviceRatio,
+                    child: Center(
+                      child: AspectRatio(
+                        aspectRatio: _currentController.value.aspectRatio,
+                        child: VideoPlayer(_currentController),
+                      ),
+                    ),
+                  ))
+                : Center(child: CircularProgressIndicator())));
   }
 
   @override

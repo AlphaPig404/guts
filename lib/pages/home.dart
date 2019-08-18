@@ -48,9 +48,10 @@ class HomePageState extends State<HomePage>
   }
 
   void getChallengeList(String tabName) async {
+    final int uid = Common.user.uid;
     if (tabName == 'player') {
       Response response =
-          await Common.dio.get('${Apis.getChallengeList}?role=0&uid=10013');
+          await Common.dio.get('${Apis.getChallengeList}?role=0&uid=$uid');
       List _challengeList = response.data;
       setState(() {
         playerChallengeList = _challengeList
@@ -59,7 +60,7 @@ class HomePageState extends State<HomePage>
       });
     } else if (tabName == 'watcher') {
       Response response =
-          await Common.dio.get('${Apis.getChallengeList}?role=1&uid=10013');
+          await Common.dio.get('${Apis.getChallengeList}?role=1&uid=$uid');
       List _challengeList = response.data;
       setState(() {
         watcherChallengeList = _challengeList
@@ -165,6 +166,11 @@ class HomePageState extends State<HomePage>
   }
 
   Widget buildTitleSection(Challenge challenge) {
+    final Map<String, Color> _levelColors = {
+      'EASY': Colors.green,
+      'HARD': Colors.yellow,
+      'CRAZY': Colors.red
+    };
     return Row(
       children: <Widget>[
         Expanded(
@@ -176,7 +182,7 @@ class HomePageState extends State<HomePage>
                   height: 16,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
-                      color: Colors.green),
+                      color: _levelColors[challenge.level]),
                   margin: EdgeInsets.only(right: 10),
                 ),
                 Text(challenge.level)
