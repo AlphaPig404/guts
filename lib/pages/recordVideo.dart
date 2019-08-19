@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:gut/components/progressBar.dart';
+import 'package:gut/model/challenge.dart';
 import 'package:gut/utils/common.dart';
 import 'package:gut/model/localVideo.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +12,8 @@ List<CameraDescription> cameras = [];
 final lpbKey = GlobalKey<LinerProgressBarState>();
 
 class RecordPage extends StatefulWidget {
+  RecordPage({this.challenge});
+  final Challenge challenge;
   @override
   _CameraAppState createState() => _CameraAppState();
 }
@@ -45,8 +48,10 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
     localVideo = LocalVideo(
         name: videoName,
         path: '${Common.movieDir.path}/$videoName.mp4',
+		coverImage: '${Common.imgDir.path}/$videoName.jpg',
         segments: [],
         duration: 0.0,
+		challengId: widget.challenge.id,
         targetDuration: limitSeconds);
     linerProgressBar = LinerProgressBar(
       localVideo: localVideo,
@@ -216,6 +221,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
   }
 
   Widget buildHeader() {
+	final challenge = widget.challenge;
     return Container(
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.all(10),
@@ -231,7 +237,7 @@ class _CameraAppState extends State<RecordPage> with WidgetsBindingObserver {
                 buildCancleButton(),
                 Expanded(
                   child: Text(
-                    'Sing in a full resturant',
+                    challenge.title,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.body2,
                   ),

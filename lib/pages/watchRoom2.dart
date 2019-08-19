@@ -18,7 +18,7 @@ class VideoController {
 
 	factory VideoController(String videoPath){
 	  final VideoPlayerController controller =
-          VideoPlayerController.asset(videoPath);
+          VideoPlayerController.network(videoPath);
       final Future<void> initializeVideoPlayerFuture = controller.initialize();
       controller.setLooping(true);
 	  return VideoController._(path: videoPath, controller: controller, initializeVideoPlayerFuture: initializeVideoPlayerFuture);
@@ -32,12 +32,14 @@ enum SwiperGuesture{
 
 class WatchRoomState extends State<WatchRoomPage> {
   List<String> videoList = [
-    'assets/videos/1564985072455986.mp4',
-    'assets/videos/1564985192679807.mp4',
-    'assets/videos/1564985217646970.mp4',
-    'assets/videos/1564985233887636.mp4',
-	'assets/videos/1564985072455986.mp4',
-    'assets/videos/1564985192679807.mp4',
+    'https://dgfbllonk2lcz.cloudfront.net/gut/video/2019/8/18/6/2ceda7a036974a719cddc04455cc2ae7_1564985072455986.mp4',
+    'https://dgfbllonk2lcz.cloudfront.net/gut/video/2019/8/18/6/cfc6a214f98749cc8ac85a338d4db685_1564985192679807.mp4',
+    'https://dgfbllonk2lcz.cloudfront.net/gut/video/2019/8/18/6/38315d93258c4f9788ef77ee1233ef67_1564985217646970.mp4',
+    'https://dgfbllonk2lcz.cloudfront.net/gut/video/2019/8/18/6/abd9dcfbdeb24b4cbef2627f083bd1ee_1564985233887636.mp4',
+     'https://dgfbllonk2lcz.cloudfront.net/gut/video/2019/8/18/6/2ceda7a036974a719cddc04455cc2ae7_1564985072455986.mp4',
+    'https://dgfbllonk2lcz.cloudfront.net/gut/video/2019/8/18/6/cfc6a214f98749cc8ac85a338d4db685_1564985192679807.mp4',
+    'https://dgfbllonk2lcz.cloudfront.net/gut/video/2019/8/18/6/38315d93258c4f9788ef77ee1233ef67_1564985217646970.mp4',
+    'https://dgfbllonk2lcz.cloudfront.net/gut/video/2019/8/18/6/abd9dcfbdeb24b4cbef2627f083bd1ee_1564985233887636.mp4',
   ];
 
   List<VideoController> videoControllers = [];

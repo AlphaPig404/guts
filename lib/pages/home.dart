@@ -1,12 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as prefix0;
 import 'package:gut/model/challenge.dart';
 import 'package:gut/utils/common.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:gut/utils/api.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert' as JSON;
+
+import 'package:toast/toast.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -36,8 +37,8 @@ class HomePageState extends State<HomePage>
           });
         }
       });
-	getChallengeList('player');
-	getChallengeList('watcher');
+    getChallengeList('player');
+    getChallengeList('watcher');
   }
 
   @override
@@ -46,20 +47,27 @@ class HomePageState extends State<HomePage>
     super.dispose();
   }
 
-  void getChallengeList(String tabName) async{
-	if(tabName == 'player'){
-		Response response = await Common.dio.get('${Apis.getChallengeList}?role=0&uid=10013');
-		List _challengeList = response.data;
-		setState(() {
-			playerChallengeList = _challengeList.map((challenge) => Challenge.fromJson(challenge)).toList();
-		});
-	}else if(tabName == 'watcher'){
-		Response response = await Common.dio.get('${Apis.getChallengeList}?role=1&uid=10013');
-		List _challengeList = response.data;
-		setState(() {
-			watcherChallengeList = _challengeList.map((challenge) => Challenge.fromJson(challenge)).toList();
-		});
-	}
+  void getChallengeList(String tabName) async {
+    final int uid = Common.user.uid;
+    if (tabName == 'player') {
+      Response response =
+          await Common.dio.get('${Apis.getChallengeList}?role=0&uid=$uid');
+      List _challengeList = response.data;
+      setState(() {
+        playerChallengeList = _challengeList
+            .map((challenge) => Challenge.fromJson(challenge))
+            .toList();
+      });
+    } else if (tabName == 'watcher') {
+      Response response =
+          await Common.dio.get('${Apis.getChallengeList}?role=1&uid=$uid');
+      List _challengeList = response.data;
+      setState(() {
+        watcherChallengeList = _challengeList
+            .map((challenge) => Challenge.fromJson(challenge))
+            .toList();
+      });
+    }
   }
 
   @override
@@ -137,27 +145,32 @@ class HomePageState extends State<HomePage>
   }
 
   Widget _buildSuggestions(String tabName) {
-	if(tabName == 'player'){
-		return buildPlayerChanlenge(tabName, playerChallengeList);
-	}else{
-		return buildPlayerChanlenge(tabName, watcherChallengeList);
-	}
+    if (tabName == 'player') {
+      return buildPlayerChanlenge(tabName, playerChallengeList);
+    } else {
+      return buildPlayerChanlenge(tabName, watcherChallengeList);
+    }
   }
 
-  Widget buildPlayerChanlenge(tabName, challengeList){
-	return new ListView.separated(
+  Widget buildPlayerChanlenge(tabName, challengeList) {
+    return new ListView.separated(
       padding: const EdgeInsets.all(10.0),
-	  itemCount: challengeList.length,
+      itemCount: challengeList.length,
       itemBuilder: (context, i) {
         return _buildRow(tabName, challengeList[i]);
       },
-	  separatorBuilder: (BuildContext context, int index) {
+      separatorBuilder: (BuildContext context, int index) {
         return Divider();
       },
     );
   }
 
   Widget buildTitleSection(Challenge challenge) {
+    final Map<String, Color> _levelColors = {
+      'EASY': Colors.green,
+      'HARD': Colors.yellow,
+      'CRAZY': Colors.red
+    };
     return Row(
       children: <Widget>[
         Expanded(
@@ -169,12 +182,10 @@ class HomePageState extends State<HomePage>
                   height: 16,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
-                      color: Colors.green),
+                      color: _levelColors[challenge.level]),
                   margin: EdgeInsets.only(right: 10),
                 ),
-                Text(
-					challenge.level
-				)
+                Text(challenge.level)
               ],
             ),
           ),
@@ -188,6 +199,23 @@ class HomePageState extends State<HomePage>
     );
   }
 
+  void acceptChallenge(Challenge chanllenge) async {
+    //   acceptChallenge
+    Response response = await Common.dio.post(Apis.acceptChallenge,
+        data: {"challenge_id": chanllenge.id, "uid": Common.user.uid});
+    print(response.data);
+    PermissionHandler().requestPermissions([
+      PermissionGroup.camera,
+      PermissionGroup.microphone
+    ]).then((permissions) {
+      final bool allGranted = permissions.values
+          .every((value) => value == PermissionStatus.granted);
+      if (allGranted) {
+        Navigator.of(context).pushNamed('/recordVideo', arguments: chanllenge);
+      }
+    });
+  }
+
   Widget buildDetailSection(String tabName, Challenge challenge) {
     final bool isWatcher = tabName == 'Watcher';
     return Row(
@@ -199,7 +227,7 @@ class HomePageState extends State<HomePage>
             children: <Widget>[
               Text(
                 challenge.title,
-				softWrap: true,
+                softWrap: true,
                 style: Theme.of(context).textTheme.title,
               ),
               SizedBox(height: 4),
@@ -210,10 +238,10 @@ class HomePageState extends State<HomePage>
               ),
               SizedBox(height: 20),
               Container(
-				width: 74.5,
-				height: 28,
+                width: 74.5,
+                height: 28,
                 child: FlatButton(
-				  padding: EdgeInsets.all(0),
+                  padding: EdgeInsets.all(0),
                   child: Text(
                     isWatcher ? 'Watch' : 'Accept',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -221,12 +249,7 @@ class HomePageState extends State<HomePage>
                   onPressed: () {
                     isWatcher
                         ? Navigator.of(context).pushNamed('/watchRoom')
-                        : PermissionHandler().requestPermissions([PermissionGroup.camera, PermissionGroup.microphone]).then((permissions){
-							final bool allGranted = permissions.values.every((value) => value == PermissionStatus.granted);
-							if(allGranted){
-								Navigator.of(context).pushNamed('/recordVideo');
-							}
-						});
+                        : acceptChallenge(challenge);
                   },
                   color: Color.fromARGB(25, 255, 255, 255),
                   shape: RoundedRectangleBorder(

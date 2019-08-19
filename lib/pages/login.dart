@@ -6,6 +6,7 @@ import 'dart:convert' as JSON;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:gut/model/user.dart';
 import 'package:gut/utils/api.dart';
 import 'package:gut/utils/common.dart';
 import 'package:toast/toast.dart';
@@ -90,7 +91,7 @@ class LoginForm extends StatefulWidget {
 class LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final storage = new FlutterSecureStorage();
-  String _captcha='', _phone='';
+  String _captcha = '', _phone = '';
   String areaCodes = '';
   String _areaCode = '65';
   bool _isSendCaptcha = false;
@@ -135,12 +136,14 @@ class LoginFormState extends State<LoginForm> {
     if (_phone.isNotEmpty && _captcha.isNotEmpty) {
       try {
         Response response = await Common.dio.post(Apis.login,
-            data: {"area_code": _areaCode, "code": _captcha, "phone": _phone});	
-		await storage.write(key: 'user', value: response.toString());
+            data: {"area_code": _areaCode, "code": _captcha, "phone": _phone});
+        Common.user = User.fromJson(response.data);
+        await storage.write(key: 'user', value: response.toString());
         Navigator.of(context).popAndPushNamed('/home');
       } on DioError catch (e) {
         if (e.response != null) {
-		  Toast.show(e.response.data['msg'], context,duration: Toast.LENGTH_LONG);
+          Toast.show(e.response.data['msg'], context,
+              duration: Toast.LENGTH_LONG);
         } else {
           print(e.request);
           print(e.message);
