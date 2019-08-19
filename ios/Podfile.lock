@@ -51,7 +51,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   camera: d56ad165545ae5a0ffb892376033760a969c68c8
-  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
   flutter_ffmpeg: 05ee218287a2b55a13df8f7970aab1a52094083e
   flutter_secure_storage: 0c5779648ff644110e507909b77a57e620cbbf8b
   mobile-ffmpeg-full: ef35cde76b752a4a1479a8128ba7e970a4ccbafb

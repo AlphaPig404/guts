@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'dart:ui';
+import 'package:gut/model/videoInfo.dart';
 
 class PlayVideo extends StatefulWidget {
   @override 
@@ -69,10 +70,12 @@ class PlayVideoState extends State<PlayVideo> {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 375, height: 667)..init(context);
-    print('设备宽度:${ScreenUtil.screenWidth}'); //Device width
-    print('设备高度:${ScreenUtil.screenHeight}'); //Device height
-    // print('实际宽度的dp与设计稿px的比例:${ScreenUtil.getInstance().scaleWidth}');
-    // print('实际高度的dp与设计稿px的比例:${ScreenUtil.getInstance().scaleHeight}');
+    // print('设备宽度:${ScreenUtil.screenWidth}'); //Device width
+    // print('设备高度:${ScreenUtil.screenHeight}'); //Device height
+    Pepole ss=ModalRoute.of(context).settings.arguments;
+    print("===============");
+    print(ss);
+    print("===============");
     
     Widget liveInfo(data){
        return Container(
@@ -156,10 +159,9 @@ class PlayVideoState extends State<PlayVideo> {
         children: <Widget>[
           Listener(
             child: Container(
-              // color: Colors.yellow,
-              child: Chewie(
-                    controller: chewieController,
-                  ),
+              // child: Chewie(
+              //       controller: chewieController,
+              //     ),
             ),
             onPointerDown: _handleTapDown,
           ),
@@ -263,7 +265,9 @@ class PlayVideoState extends State<PlayVideo> {
                   ),
                 ),
               ),
-              onTap: ()=> _testClick(),
+              onTap: (){
+                Navigator.pushNamed(context, '/watchVideoList',arguments: Pepole("xiongben", 26));
+              },
             ),
           ),
 

@@ -1,6 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import './PlayVideo.dart';
+import 'package:gut/utils/common.dart';
+import 'package:gut/utils/api.dart';
+import 'package:gut/model/videoInfo.dart';
+
+
 
 
 class WatchVideoList extends StatefulWidget {
@@ -17,13 +25,31 @@ class WatchVideoListState extends State<WatchVideoList> {
     // TODO: implement initState
     super.initState();
     setState(() {
-      datalist:[1,2,3,4,5,6,7];
+      datalist:[];
     });
+    getVideoList(4);
   }
 
-  void _testclick(index){
-    print('正在点击第${index}个box');
-    Navigator.push(context, new MaterialPageRoute(builder: (context) {return new PlayVideo();}));
+   void getVideoList(int challengeId) async{
+      var responsedata = await Common.dio.get('${Apis.getVideoList}?challenge_id=4');
+      // List _challengeList = response.data;
+      setState((){
+        datalist  = responsedata.data;
+      });
+      // print("===============");
+      // print(datalist);
+      // print("===============");
+    
+  }
+
+  void _testclick(context,data){
+    // print(data);
+    // VideoInfo data_s = VideoInfo(data['host_id'], data['challenge_id'], data['video_id'], data['video_url'], data['votes']);
+    // print(data_s);
+    Navigator.pushNamed(context, '/playVideo',arguments: Pepole("xiongben", 26));
+   
+    // Navigator.of(context).pushNamed('/playVideo',arguments: Pepole("xiongben", 26));
+    // Navigator.push(context, new MaterialPageRoute(builder: (context) {return new PlayVideo();}));
     // showDialog(
     //   context: context,
     //   barrierDismissible: true,
@@ -63,11 +89,12 @@ class WatchVideoListState extends State<WatchVideoList> {
     double paddingNum = ScreenUtil.getInstance().setWidth(8);
     double itemRadius = ScreenUtil.getInstance().setWidth(5);
     
-    // print('设备宽度:${ScreenUtil.screenWidth}'); //Device width
-    // print('设备高度:${ScreenUtil.screenHeight}'); //Device height
-    // print('实际宽度的dp与设计稿px的比例:${ScreenUtil.getInstance().scaleWidth}');
-    // print('实际高度的dp与设计稿px的比例:${ScreenUtil.getInstance().scaleHeight}');
-    
+    Pepole ss=ModalRoute.of(context).settings.arguments;
+    print("===============");
+    print(ss);
+    print("===============");
+
+
     Widget _itemLi(indexnum){
        return Container(
           width: ScreenUtil.getInstance().setWidth(175),
@@ -89,12 +116,12 @@ class WatchVideoListState extends State<WatchVideoList> {
                     ),
                   ),
                 ),
-                onTap: ()=> _testclick(indexnum),
+                onTap: ()=> _testclick(context,datalist[indexnum]),
               ),
               Positioned(
                 left:ScreenUtil.getInstance().setWidth(10),
                 bottom: ScreenUtil.getInstance().setWidth(10),
-                child: Text("wo shi kakaxi",style: TextStyle(
+                child: Text("user name",style: TextStyle(
                   color:Colors.white,
                   fontSize: ScreenUtil.getInstance().setWidth(14),
                 ),),
@@ -125,12 +152,10 @@ class WatchVideoListState extends State<WatchVideoList> {
                   childAspectRatio: 1.0,
                   crossAxisSpacing: ScreenUtil.getInstance().setWidth(8),
                   mainAxisSpacing: ScreenUtil.getInstance().setWidth(8),
-                  
                 ),
-                itemCount: 40,
+                itemCount: datalist.length,
                 padding:EdgeInsets.all(paddingNum),
                 itemBuilder: (context, index) {
-                  print('这是inde的显示:${index}');
                   return _itemLi(index);
                 },
               ),
