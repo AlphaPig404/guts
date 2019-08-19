@@ -185,9 +185,9 @@ class PlayVideoState extends State<PlayVideo> {
         children: <Widget>[
           Listener(
             child: Container(
-              // child: Chewie(
-              //       controller: chewieController,
-              //     ),
+              child: Chewie(
+                    controller: chewieController,
+                  ),
             ),
             onPointerDown: _handleTapDown,
           ),
@@ -292,7 +292,8 @@ class PlayVideoState extends State<PlayVideo> {
                 ),
               ),
               onTap: (){
-                Navigator.pushNamed(context, '/watchVideoList',arguments: Pepole("xiongben", 26));
+                // Navigator.pushNamed(context, '/watchVideoList',arguments: Pepole("xiongben", 26));
+                Navigator.pop(context);
               },
             ),
           ),
