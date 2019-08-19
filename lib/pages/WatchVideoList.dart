@@ -98,6 +98,8 @@ class WatchVideoListState extends State<WatchVideoList> {
 
 
     Widget _itemLi(indexnum){
+       String ItemImg = datalist[indexnum]['cover_url'];
+       print(ItemImg);
        return Container(
           width: ScreenUtil.getInstance().setWidth(175),
           height: ScreenUtil.getInstance().setWidth(175),
@@ -111,12 +113,9 @@ class WatchVideoListState extends State<WatchVideoList> {
             children: <Widget>[
               GestureDetector(
                 child: Container(
-                  decoration: BoxDecoration(
-                      image: DecorationImage(
-                      image: ExactAssetImage('assets/images/btLiveGiftSpecialNormal.png'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+                      child: Image.network('${ItemImg}',
+                          fit: BoxFit.cover,
+                      ),
                 ),
                 onTap: ()=> _testclick(datalist[indexnum]),
               ),
