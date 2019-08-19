@@ -50,6 +50,7 @@ class HomePageState extends State<HomePage>
 
   void getChallengeList(String tabName) async {
     final int uid = Common.user.uid;
+    print('uid:$uid');
     if (tabName == 'player') {
       Response response =
           await Common.dio.get('${Apis.getChallengeList}?role=0&uid=$uid');
