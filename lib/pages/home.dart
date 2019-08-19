@@ -201,9 +201,17 @@ class HomePageState extends State<HomePage>
 
   void acceptChallenge(Challenge chanllenge) async {
     //   acceptChallenge
-    Response response = await Common.dio.post(Apis.acceptChallenge,
-        data: {"challenge_id": chanllenge.id, "uid": Common.user.uid});
-    print(response.data);
+    if (chanllenge.status == 0) {
+      Response response = await Common.dio.post(Apis.acceptChallenge,
+          data: {"challenge_id": chanllenge.id, "uid": Common.user.uid});
+      print(response.data);
+    }else if(chanllenge.status == 1){
+
+    }else if(chanllenge.status == 2){
+      Toast.show('Completed already', context, duration: Toast.LENGTH_LONG);
+      return;
+    }
+
     PermissionHandler().requestPermissions([
       PermissionGroup.camera,
       PermissionGroup.microphone
@@ -248,7 +256,8 @@ class HomePageState extends State<HomePage>
                   ),
                   onPressed: () {
                     isWatcher
-                        ? Navigator.of(context).pushNamed('/watchRoom', arguments: challenge)
+                        ? Navigator.of(context)
+                            .pushNamed('/watchRoom', arguments: challenge)
                         : acceptChallenge(challenge);
                   },
                   color: Color.fromARGB(25, 255, 255, 255),
