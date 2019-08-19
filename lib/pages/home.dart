@@ -169,6 +169,7 @@ class HomePageState extends State<HomePage>
     final Map<String, Color> _levelColors = {
       'EASY': Colors.green,
       'HARD': Colors.yellow,
+      'CRAZY': Colors.red
     };
     return Row(
       children: <Widget>[
