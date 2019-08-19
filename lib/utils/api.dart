@@ -8,4 +8,5 @@ class Apis {
 	static final String uploadVideo = '/video/upload';
 	static final String upload = '/file/upload';
 
+  static final String getExploreVideos = '/video/explore-videos';
 }
