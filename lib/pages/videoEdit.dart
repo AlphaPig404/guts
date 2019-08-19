@@ -79,7 +79,7 @@ class VideoEditPageState extends State<VideoEditPage> {
     }
   }
 
-  Future<void> uploadVideo() async {
+  Future<Response> uploadVideo() async {
     final LocalVideo localVideo = widget.localVideo;
     FormData videoFormData = new FormData.from({
       "saveFolder": "gut/${Common.user.uid}/video",
@@ -124,7 +124,8 @@ class VideoEditPageState extends State<VideoEditPage> {
           });
           widget.localVideo.concatSegments().then((ret) async {
             if (ret == 0) {
-              await uploadVideo();
+              Response response = await uploadVideo();
+              print('upload response: ${response.data}');
               Navigator.of(context).pushNamedAndRemoveUntil(
                   '/home', (Route<dynamic> route) => false);
             } else {

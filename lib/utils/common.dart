@@ -6,7 +6,7 @@ import 'package:gut/utils/api.dart';
 
 Dio initDio() {
   BaseOptions options = new BaseOptions(
-    baseUrl: "http://10.40.16.20:8000",
+    baseUrl: "http://dev-gut.loopslive.com",
     connectTimeout: 30000,
     receiveTimeout: 10000,
   );
@@ -21,6 +21,7 @@ Dio initDio() {
         options.path == Apis.refreshAccessToken) {
       return options;
     } else {
+      // TODO: handle authorization;
       // options.path += '?uid=${Common.user.uid}';
       // options.headers["Authorization"] = Common.user.accessToken;
     }
