@@ -257,9 +257,6 @@ class HomePageState extends State<HomePage>
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   onPressed: () {
-                    // isWatcher
-                    //     ? Navigator.of(context).pushNamed('/watchRoom')
-                    //     : acceptChallenge(challenge);
                     Map params = {'challenge_id':challenge.id,'title':challenge.title,};
                     isWatcher
                         ? Navigator.push(context, new MaterialPageRoute(builder: (context) {return new WatchVideoList(list_params:params);}))
