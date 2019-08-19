@@ -7,6 +7,8 @@ import 'dart:ui';
 import 'package:gut/model/videoInfo.dart';
 
 class PlayVideo extends StatefulWidget {
+  PlayVideo({Key key,this.params}) : super(key : key);
+  final Map params;
   @override 
   State<StatefulWidget> createState() {
     return PlayVideoState();
@@ -17,16 +19,17 @@ class PlayVideoState extends State<PlayVideo> {
   VideoPlayerController videoPlayerController;
   ChewieController chewieController;
   bool isPlaying;
+  Map videoInfoData;
 
   @override
   void initState() {
     super.initState();
-    print("======================");
-    print(window.physicalSize.width);
+    videoInfoData = widget.params;
+    // print(videoInfoData["votes"]);
     final screenWidth = window.physicalSize.width;
     final screenHeight = window.physicalSize.height;
     isPlaying = true;
-    videoPlayerController = VideoPlayerController.network('http://v.xiaohongshu.com/c42cc40635a4d89107b6d62dfc56abb35bbe35b9?sign=88b58608f948c28bafe67797ff4fb334&t=5d543000');
+    videoPlayerController = VideoPlayerController.network(videoInfoData['video_url']);
     chewieController = ChewieController(
       videoPlayerController: videoPlayerController,
       aspectRatio: screenWidth / screenHeight,  //9:16
@@ -36,9 +39,9 @@ class PlayVideoState extends State<PlayVideo> {
       showControls: false,
       
     );
-    // print("======================");
-    // print(chewieController);
-    // print("======================");
+    print("======================");
+    print(chewieController);
+    print("======================");
   }
 
   void _handleTapDown(pointerDownEvent) {
@@ -58,7 +61,33 @@ class PlayVideoState extends State<PlayVideo> {
   
   void _testClick() {
     print("==========dianji======test=====");
-    
+    Map loveParams = {'id':1111};
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => dialogWidget(loveParams),
+    );
+  }
+
+  Widget dialogWidget(data){
+    return AlertDialog(
+        title: Text('Attention!'),
+        content: Text(('You need to pay 1 coin to vote this user!')),
+        actions: <Widget>[
+          new FlatButton(
+            child: new Text("Concerl"),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          new FlatButton(
+            child: new Text("Confirm"),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
   }
 
   Widget topArea(){
@@ -72,10 +101,7 @@ class PlayVideoState extends State<PlayVideo> {
     ScreenUtil.instance = ScreenUtil(width: 375, height: 667)..init(context);
     // print('设备宽度:${ScreenUtil.screenWidth}'); //Device width
     // print('设备高度:${ScreenUtil.screenHeight}'); //Device height
-    Pepole ss=ModalRoute.of(context).settings.arguments;
-    print("===============");
-    print(ss);
-    print("===============");
+   
     
     Widget liveInfo(data){
        return Container(
@@ -85,7 +111,7 @@ class PlayVideoState extends State<PlayVideo> {
          child: Column(
           //  mainAxisAlignment: MainAxisAlignment.center,
            children: <Widget>[
-             Text("ddd dddd ddd",style: TextStyle(
+             Text('${videoInfoData["title"]}',style: TextStyle(
                color: Colors.white,
                fontSize: ScreenUtil.getInstance().setWidth(18),
              ),),
@@ -93,21 +119,21 @@ class PlayVideoState extends State<PlayVideo> {
                mainAxisAlignment: MainAxisAlignment.center,
                children: <Widget>[
                  Image.asset(
-                   'assets/images/btLiveGiftSpecialNormal.png',
-                   width: ScreenUtil.getInstance().setWidth(12),
-                   height: ScreenUtil.getInstance().setWidth(12),
+                   'assets/images/icLive.png',
+                   width: ScreenUtil.getInstance().setWidth(30),
+                   height: ScreenUtil.getInstance().setWidth(30),
                    ),
-                   Text('rrrrr',style:TextStyle(
+                   Text('Live',style:TextStyle(
                      color: Colors.white,
                      fontSize: ScreenUtil.getInstance().setWidth(12),
                    )),
                    Container(width: 20,height:40),
                    Image.asset(
-                   'assets/images/btLiveGiftSpecialNormal.png',
-                   width: ScreenUtil.getInstance().setWidth(12),
-                   height: ScreenUtil.getInstance().setWidth(12),
+                   'assets/images/icLikeLive.png',
+                   width: ScreenUtil.getInstance().setWidth(30),
+                   height: ScreenUtil.getInstance().setWidth(30),
                    ),
-                   Text('rrrrr',style:TextStyle(
+                   Text('${videoInfoData["votes"]} Point',style:TextStyle(
                      color: Colors.white,
                      fontSize: ScreenUtil.getInstance().setWidth(12),
                    )),
@@ -207,7 +233,7 @@ class PlayVideoState extends State<PlayVideo> {
               width: ScreenUtil.getInstance().setWidth(60),
               height:ScreenUtil.getInstance().setWidth(14),
               // color: Colors.blue,
-              child: Text("222/222",
+              child: Text("${videoInfoData["votes"]}/222",
                 style: TextStyle(
                   color:Colors.white,
                 ),
@@ -247,7 +273,7 @@ class PlayVideoState extends State<PlayVideo> {
                   ),
                 ),
               ),
-              onTap: ()=> _testClick(),
+              // onTap: ()=> _testClick(),
             ),
           ),
           Positioned(

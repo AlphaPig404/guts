@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:dio/dio.dart';
 import './../utils/common.dart';
 import 'dart:async';
+import 'package:gut/model/videoInfo.dart';
 
 
 class TopUp extends StatefulWidget{
@@ -56,6 +57,26 @@ class TopUpState extends State<TopUp> {
     print('datalist:${dataList}');
 
     Widget coinsItem(data) {
+     Widget dialogWidget(data){
+        return AlertDialog(
+            title: Text('Top up'),
+            content: Text(('Top up ${data['num']} coins ')),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text("Concerl"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              new FlatButton(
+                child: new Text("Confirm"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+      }
       Widget box =  Container(
         width: ScreenUtil.getInstance().setWidth(165),
         height: ScreenUtil.getInstance().setWidth(100),
@@ -87,7 +108,7 @@ class TopUpState extends State<TopUp> {
                   Positioned(
                     left: ScreenUtil.getInstance().setWidth(41),
                     top: ScreenUtil.getInstance().setWidth(10),
-                    child: Text("100",
+                    child: Text('${data['num']}',
                     style:TextStyle(
                       fontSize: ScreenUtil.getInstance().setWidth(24),
                       fontWeight: FontWeight.w700,
@@ -112,11 +133,17 @@ class TopUpState extends State<TopUp> {
       return GestureDetector(
         child: box,
         onTap: (){
-          print("=================");
+          showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder: (context) => dialogWidget(data),
+          );
           // gethttp();
         },
       );
     }
+
+    
 
     Widget mainpage() {
          return Column(
@@ -165,12 +192,11 @@ class TopUpState extends State<TopUp> {
               runSpacing: ScreenUtil.getInstance().setWidth(15),
               alignment: WrapAlignment.start,
               children: <Widget>[
-                coinsItem("999"),
-                coinsItem("999"),
-                coinsItem("999"),
-                coinsItem("999"),
-                coinsItem("999"),
-                coinsItem("999"),
+                coinsItem({'num':100}),
+                coinsItem({'num':200}),
+                coinsItem({'num':300}),
+                coinsItem({'num':500}),
+                coinsItem({'num':1000})
               ],
             ),
           ),
@@ -193,9 +219,6 @@ class TopUpState extends State<TopUp> {
         backgroundColor: const Color.fromRGBO(43,43,48,1),
       ),
       body: initdom(),
-      
-      
-      
     );
   }
 

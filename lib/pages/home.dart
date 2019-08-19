@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'dart:convert' as JSON;
 
 import 'package:toast/toast.dart';
+import './WatchVideoList.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -137,7 +138,7 @@ class HomePageState extends State<HomePage>
         IconButton(
           icon: Icon(Icons.settings),
           onPressed: () {
-            Navigator.of(context).pushNamed('/movieList');
+            Navigator.of(context).pushNamed('/topup');
           },
         )
       ],
@@ -247,8 +248,12 @@ class HomePageState extends State<HomePage>
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   onPressed: () {
+                    // isWatcher
+                    //     ? Navigator.of(context).pushNamed('/watchRoom')
+                    //     : acceptChallenge(challenge);
+                    Map params = {'challenge_id':challenge.id,'title':challenge.title,};
                     isWatcher
-                        ? Navigator.of(context).pushNamed('/watchRoom')
+                        ? Navigator.push(context, new MaterialPageRoute(builder: (context) {return new WatchVideoList(list_params:params);}))
                         : acceptChallenge(challenge);
                   },
                   color: Color.fromARGB(25, 255, 255, 255),

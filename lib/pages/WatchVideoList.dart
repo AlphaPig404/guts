@@ -7,11 +7,16 @@ import './PlayVideo.dart';
 import 'package:gut/utils/common.dart';
 import 'package:gut/utils/api.dart';
 import 'package:gut/model/videoInfo.dart';
-
+import 'package:permission_handler/permission_handler.dart';
+import 'package:gut/utils/api.dart';
+import 'package:dio/dio.dart';
+import 'dart:convert' as JSON;
 
 
 
 class WatchVideoList extends StatefulWidget {
+  WatchVideoList({Key key,this.list_params}) : super(key : key);
+  final Map list_params;
   @override 
   State<StatefulWidget> createState() {
     return WatchVideoListState();
@@ -20,6 +25,7 @@ class WatchVideoList extends StatefulWidget {
 
 class WatchVideoListState extends State<WatchVideoList> {
   List datalist = [];
+  Map listParamsData;
   @override 
   void initState() {
     // TODO: implement initState
@@ -27,29 +33,30 @@ class WatchVideoListState extends State<WatchVideoList> {
     setState(() {
       datalist:[];
     });
-    getVideoList(4);
+    listParamsData = widget.list_params;
+    print(listParamsData);
+    getVideoList(listParamsData['challenge_id']);
   }
 
    void getVideoList(int challengeId) async{
-      var responsedata = await Common.dio.get('${Apis.getVideoList}?challenge_id=4');
+      final int uid = Common.user.uid;
+      var responsedata = await Common.dio.get('${Apis.getVideoList}?challenge_id=${challengeId}');
       // List _challengeList = response.data;
       setState((){
         datalist  = responsedata.data;
       });
-      // print("===============");
-      // print(datalist);
-      // print("===============");
+      print("===============");
+      print(datalist);
+      print("===============");
     
   }
 
-  void _testclick(context,data){
-    // print(data);
-    // VideoInfo data_s = VideoInfo(data['host_id'], data['challenge_id'], data['video_id'], data['video_url'], data['votes']);
-    // print(data_s);
-    Navigator.pushNamed(context, '/playVideo',arguments: Pepole("xiongben", 26));
-   
+  void _testclick(data){
+    // Navigator.pushNamed(context, '/playVideo',arguments: Pepole("xiongben", 26));
     // Navigator.of(context).pushNamed('/playVideo',arguments: Pepole("xiongben", 26));
-    // Navigator.push(context, new MaterialPageRoute(builder: (context) {return new PlayVideo();}));
+    Map params = data;
+    params['title'] = listParamsData['title'];
+    Navigator.push(context, new MaterialPageRoute(builder: (context) {return new PlayVideo(params:params);}));
     // showDialog(
     //   context: context,
     //   barrierDismissible: true,
@@ -58,9 +65,7 @@ class WatchVideoListState extends State<WatchVideoList> {
     
   }
 
-  void _voteClick(params){
-    print("========vote=====");
-  }
+  
 
   Widget dialogWidget(data){
     return AlertDialog(
@@ -89,10 +94,7 @@ class WatchVideoListState extends State<WatchVideoList> {
     double paddingNum = ScreenUtil.getInstance().setWidth(8);
     double itemRadius = ScreenUtil.getInstance().setWidth(5);
     
-    Pepole ss=ModalRoute.of(context).settings.arguments;
-    print("===============");
-    print(ss);
-    print("===============");
+    
 
 
     Widget _itemLi(indexnum){
@@ -116,7 +118,7 @@ class WatchVideoListState extends State<WatchVideoList> {
                     ),
                   ),
                 ),
-                onTap: ()=> _testclick(context,datalist[indexnum]),
+                onTap: ()=> _testclick(datalist[indexnum]),
               ),
               Positioned(
                 left:ScreenUtil.getInstance().setWidth(10),
