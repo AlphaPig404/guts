@@ -47,7 +47,7 @@ class LoginState extends State<LoginPage> {
       height: 400,
       child: Column(
         children: <Widget>[
-          Text('WELCOME TO GUT',
+          Text('WELCOME TO GUTS',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.title),
           LoginForm(),

@@ -129,7 +129,7 @@ class HomePageState extends State<HomePage>
       leading: Container(
         padding: EdgeInsets.fromLTRB(14.5, 16, 0, 0),
         child: Text(
-          'GUT',
+          'GUTS',
           style: Theme.of(context).textTheme.title,
           softWrap: false,
           overflow: TextOverflow.visible,

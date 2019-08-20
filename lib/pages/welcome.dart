@@ -20,7 +20,7 @@ class WelcomePage extends StatelessWidget {
               Container(
                 padding: EdgeInsets.fromLTRB(0, 40, 0, 0),
                 alignment: Alignment.topCenter,
-                child: new Text('Welcome to GUT'),
+                child: new Text('Welcome to GUTS'),
               ),
               Container(
                 alignment: Alignment.bottomCenter,

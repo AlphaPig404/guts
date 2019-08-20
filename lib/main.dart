@@ -69,7 +69,7 @@ class Gut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'GUT',
+        title: 'GUTS',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           brightness: Brightness.dark,
